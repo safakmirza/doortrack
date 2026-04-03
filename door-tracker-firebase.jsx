@@ -1,5 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as XLSX from "xlsx";
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
+
+var firebaseConfig = {
+  apiKey: "AIzaSyAoKSnHzXesT4dVAOhYR7VJf-oimIuirsE",
+  authDomain: "doortrack-60b8c.firebaseapp.com",
+  projectId: "doortrack-60b8c",
+  storageBucket: "doortrack-60b8c.firebasestorage.app",
+  messagingSenderId: "433276578809",
+  appId: "1:433276578809:web:eafbbf2179bcc0d610ab28"
+};
+var fbApp = initializeApp(firebaseConfig);
+var db = getFirestore(fbApp);
 
 // All possible steps
 var ALL_STEPS = [
@@ -600,8 +613,8 @@ var DEFAULT_CAT_IMAGES={
 "STP-002":"data:image/jpeg;base64,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"
 };
 function fmtD(ts){if(!ts)return"";var d=new Date(ts);return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});}
-function sGet(k){try{var r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
-function sSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.error(e);}}
+async function sGet(k){try{var snap=await getDoc(doc(db,"appData",k));if(snap.exists()){return JSON.parse(snap.data().value);}return null;}catch(e){console.error("sGet",k,e);return null;}}
+async function sSet(k,v){try{await setDoc(doc(db,"appData",k),{value:JSON.stringify(v),updatedAt:Date.now()});}catch(e){console.error("sSet",k,e);}}
 
 function parseXL(buf,existing){
   var wb=XLSX.read(buf,{type:"array"});
@@ -857,6 +870,10 @@ export default function App(){
       setPrices(res[4]&&Object.keys(res[4]).length>0?res[4]:DEFAULT_PRICES);
       setReady(true);
     });
+    var unsubs=[];
+    unsubs.push(onSnapshot(doc(db,"appData","dtv7-proj"),function(snap){if(snap.exists()){try{var d=JSON.parse(snap.data().value);if(d&&d.length>0)setProjects(d);}catch(e){}}}));
+    unsubs.push(onSnapshot(doc(db,"appData","dtv7-carp"),function(snap){if(snap.exists()){try{var d=JSON.parse(snap.data().value);if(d&&d.length>0)setCarps(d);}catch(e){}}}));
+    return function(){unsubs.forEach(function(u){u();});};
   },[]);
 
   useEffect(function(){if(ready)sSet("dtv7-proj",projects);},[projects,ready]);
@@ -978,8 +995,8 @@ export default function App(){
                     <button onClick={function(){go("report");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📊 Proje Raporu</button>
                     <button onClick={function(){go("hakedis");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>💰 Hakediş</button>
                     <button onClick={function(){go("qrLabels");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🏷 QR Etiketleri</button>
-                    <button onClick={function(){var data={};["dtv7-proj","dtv7-carp","dtv7-cat","dtv7-cimg","dtv7-prices"].forEach(function(k){var v=localStorage.getItem(k);if(v)data[k]=v;});var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
-                    <button onClick={function(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(ev){try{var data=JSON.parse(ev.target.result);Object.keys(data).forEach(function(k){localStorage.setItem(k,data[k]);});window.location.reload();}catch(err){alert("Hatalı dosya");}};rd.readAsText(f);};inp.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#2a7fff",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Veri Geri Yükle</button>
+                    <button onClick={function(){var data={"dtv7-proj":JSON.stringify(projects),"dtv7-carp":JSON.stringify(carps),"dtv7-cat":JSON.stringify(catalog),"dtv7-cimg":JSON.stringify(catImages),"dtv7-prices":JSON.stringify(prices)};var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
+                    <button onClick={function(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(ev){try{var data=JSON.parse(ev.target.result);var keys=Object.keys(data);var promises=keys.map(function(k){return sSet(k,JSON.parse(data[k]));});Promise.all(promises).then(function(){window.location.reload();});}catch(err){alert("Hatalı dosya");}};rd.readAsText(f);};inp.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#2a7fff",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Veri Geri Yükle</button>
                     <button onClick={function(){if(window.confirm("Tüm kapılar silinsin mi?")){setProjects(function(p){var next=p.map(function(proj){if(proj.id!==selProjId)return proj;return Object.assign({},proj,{doors:[]});});sSet("dtv7-proj",next);return next;});setMenuOpen(false);}}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",color:"#e74c3c",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗑 Kapıları Temizle</button>
                   </div>
                 </div>)}
