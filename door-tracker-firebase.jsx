@@ -860,25 +860,28 @@ export default function App(){
   var catalogRef=useRef(null);
   var catImgRef=useRef(null);
   var catImgTargetRef=useRef("");
+  var remoteUpdate=useRef(false);
 
   useEffect(function(){
     Promise.all([sGet("dtv7-proj"),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices")]).then(function(res){
+      remoteUpdate.current=true;
       setProjects(res[0]&&res[0].length>0?res[0]:[DEFAULT_PROJECT,KINZA_PROJECT]);
       setCarps(res[1]&&res[1].length>0?res[1]:DEFAULT_CARPS);
       setCatalog(res[2]&&res[2].length>0?res[2]:DEFAULT_CATALOG);
       setCatImages(res[3]&&Object.keys(res[3]).length>0?res[3]:DEFAULT_CAT_IMAGES);
       setPrices(res[4]&&Object.keys(res[4]).length>0?res[4]:DEFAULT_PRICES);
       setReady(true);
+      setTimeout(function(){remoteUpdate.current=false;},500);
     });
     var unsubs=[];
-    unsubs.push(onSnapshot(doc(db,"appData","dtv7-proj"),function(snap){if(snap.exists()){try{var d=JSON.parse(snap.data().value);if(d&&d.length>0)setProjects(d);}catch(e){}}}));
-    unsubs.push(onSnapshot(doc(db,"appData","dtv7-carp"),function(snap){if(snap.exists()){try{var d=JSON.parse(snap.data().value);if(d&&d.length>0)setCarps(d);}catch(e){}}}));
+    unsubs.push(onSnapshot(doc(db,"appData","dtv7-proj"),function(snap){if(snap.exists()){try{var d=JSON.parse(snap.data().value);if(d&&d.length>0){remoteUpdate.current=true;setProjects(d);setTimeout(function(){remoteUpdate.current=false;},500);}}catch(e){}}}));
+    unsubs.push(onSnapshot(doc(db,"appData","dtv7-carp"),function(snap){if(snap.exists()){try{var d=JSON.parse(snap.data().value);if(d&&d.length>0){remoteUpdate.current=true;setCarps(d);setTimeout(function(){remoteUpdate.current=false;},500);}}catch(e){}}}));
     return function(){unsubs.forEach(function(u){u();});};
   },[]);
 
-  useEffect(function(){if(ready)sSet("dtv7-proj",projects);},[projects,ready]);
-  useEffect(function(){if(ready)sSet("dtv7-carp",carps);},[carps,ready]);
-  useEffect(function(){if(ready)sSet("dtv7-cat",catalog);},[catalog,ready]);
+  useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-proj",projects);},[projects,ready]);
+  useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-carp",carps);},[carps,ready]);
+  useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-cat",catalog);},[catalog,ready]);
 
   var isAdmin=user&&user.role==="admin";
   var selProj=null;projects.forEach(function(p){if(p.id===selProjId)selProj=p;});
