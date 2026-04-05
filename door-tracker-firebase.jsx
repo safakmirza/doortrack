@@ -1212,12 +1212,15 @@ export default function App(){
 
         function exportXL(){
           // Sheet 1: Matrix with dates
-          var header=["#","Kapı No","Mahal","Tip","Usta"];
+          var header=["#","Kapı No","Mahal","Tip","Usta","Fotoğraf"];
           stepShort.forEach(function(s2){header.push(s2.sh);header.push(s2.sh+" Date");});
           header.push("%");header.push("Durum");
           var rows=[header];
           doors.forEach(function(d2,idx){
-            var row=[idx+1,d2.code,d2.mahal||"",d2.kapiTipi||"",getCarpName(d2.assignedTo)];
+            var photoCount=0;
+            var dSteps=getStepsForDoor(d2);
+            dSteps.forEach(function(st){if(d2.steps&&d2.steps[st.id]&&d2.steps[st.id].photos)photoCount+=d2.steps[st.id].photos.length;});
+            var row=[idx+1,d2.code,d2.mahal||"",d2.kapiTipi||"",getCarpName(d2.assignedTo),photoCount>0?photoCount+" foto":""];
             stepShort.forEach(function(s2){
               var hasIt=doorHasStep(d2,s2.id);
               if(!hasIt){row.push("—");row.push("");}
@@ -1238,10 +1241,46 @@ export default function App(){
           });
           var ws2=XLSX.utils.aoa_to_sheet(tlRows);
 
+          // Sheet 3: Photos
+          var phHeader=["Kapı No","Mahal","Adım","Fotoğraf Adı","Tarih"];
+          var phRows=[phHeader];
+          doors.forEach(function(d2){
+            var dSteps=getStepsForDoor(d2);
+            dSteps.forEach(function(st){
+              if(d2.steps&&d2.steps[st.id]&&d2.steps[st.id].photos){
+                d2.steps[st.id].photos.forEach(function(ph){
+                  phRows.push([d2.code,d2.mahal||"",st.label,ph.name||"foto",ph.at?fmtFull(ph.at):""]);
+                });
+              }
+            });
+          });
+          var ws3=XLSX.utils.aoa_to_sheet(phRows);
+
           var wb2=XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb2,ws1,"Rapor");
           XLSX.utils.book_append_sheet(wb2,ws2,"Timeline");
+          XLSX.utils.book_append_sheet(wb2,ws3,"Fotoğraflar");
           XLSX.writeFile(wb2,selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Report.xlsx");
+        }
+        function exportPhotoHTML(){
+          var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;}h2{color:#333;border-bottom:2px solid #e67e22;padding-bottom:4px;margin-top:30px;}.door{background:#fff;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #e8e8e8;}.step{color:#888;font-size:12px;margin:4px 0;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}img{width:200px;height:150px;object-fit:cover;border-radius:8px;border:1px solid #ddd;}</style></head><body>";
+          html+="<h1>"+selProj.name+" - Fotoğraf Raporu</h1><p>"+new Date().toLocaleDateString("tr-TR")+"</p>";
+          var hasAny=false;
+          doors.forEach(function(d2){
+            var dSteps=getStepsForDoor(d2);
+            var doorPhotos=[];
+            dSteps.forEach(function(st){if(d2.steps&&d2.steps[st.id]&&d2.steps[st.id].photos){d2.steps[st.id].photos.forEach(function(ph){doorPhotos.push({step:st.label,photo:ph});});}});
+            if(doorPhotos.length>0){
+              hasAny=true;
+              html+="<div class='door'><h2>#"+d2.code+" — "+d2.kapiTipi+"</h2><p>📍 "+(d2.mahal||"")+"</p>";
+              doorPhotos.forEach(function(dp){html+="<div class='step'>"+dp.step+"</div><div class='photos'><img src='"+dp.photo.data+"'/></div>";});
+              html+="</div>";
+            }
+          });
+          if(!hasAny)html+="<p>Henüz fotoğraf yok.</p>";
+          html+="</body></html>";
+          var blob=new Blob([html],{type:"text/html"});
+          var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Foto_Rapor.html";a.click();
         }
 
         return(
@@ -1265,7 +1304,8 @@ export default function App(){
               <button onClick={function(){setReportTab("timeline");}} style={{...B,flex:1,background:reportTab==="timeline"?"#fef5eb":"#1a1a1a",color:reportTab==="timeline"?"#4da6ff":"#666",borderRadius:0,padding:12,fontSize:13}}>📅 Zaman Çizelgesi</button>
             </div>
 
-            <button onClick={exportXL} style={{...B,background:"linear-gradient(135deg,#27ae60,#219a52)",color:"#fff",width:"100%",padding:14,fontSize:14,fontWeight:600,borderRadius:12,border:"1px solid #2a5a3a",marginBottom:16}}>📥 Export to Excel (Matrix + Timeline)</button>
+            <button onClick={exportXL} style={{...B,background:"linear-gradient(135deg,#27ae60,#219a52)",color:"#fff",width:"100%",padding:14,fontSize:14,fontWeight:600,borderRadius:12,border:"1px solid #2a5a3a",marginBottom:8}}>📥 Export to Excel (Matrix + Timeline)</button>
+            <button onClick={exportPhotoHTML} style={{...B,background:"linear-gradient(135deg,#e67e22,#d35400)",color:"#fff",width:"100%",padding:14,fontSize:14,fontWeight:600,borderRadius:12,border:"1px solid #c9651a",marginBottom:16}}>📸 Fotoğraf Raporu (HTML)</button>
 
             {/* MATRIX VIEW */}
             {reportTab==="matrix"&&doors.length>0&&(
