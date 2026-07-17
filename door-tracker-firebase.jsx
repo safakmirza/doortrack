@@ -1269,7 +1269,10 @@ export default function App(){
   useEffect(function(){
     Promise.all([sGet("dtv7-proj"),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices")]).then(function(res){
       remoteUpdate.current=true;
-      setProjects(res[0]&&res[0].length>0?res[0]:[DEFAULT_PROJECT,KINZA_PROJECT,SIGMA_PROJECT]);
+      var loadedProj=res[0]&&res[0].length>0?res[0]:[DEFAULT_PROJECT,KINZA_PROJECT,SIGMA_PROJECT];
+      var defaults=[DEFAULT_PROJECT,KINZA_PROJECT,SIGMA_PROJECT];
+      defaults.forEach(function(dp){var found=false;loadedProj.forEach(function(p){if(p.id===dp.id)found=true;});if(!found)loadedProj.push(dp);});
+      setProjects(loadedProj);
       setCarps(res[1]&&res[1].length>0?res[1]:DEFAULT_CARPS);
       setCatalog(res[2]&&res[2].length>0?res[2]:DEFAULT_CATALOG);
       setCatImages(res[3]&&Object.keys(res[3]).length>0?res[3]:DEFAULT_CAT_IMAGES);
