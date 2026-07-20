@@ -1293,21 +1293,51 @@ export default function App(){
           XLSX.writeFile(wb2,selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Report.xlsx");
         }
         function exportPhotoHTML(){
-          var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;}h2{color:#333;border-bottom:2px solid #e67e22;padding-bottom:4px;margin-top:30px;}.door{background:#fff;border-radius:12px;padding:16px;margin:12px 0;border:1px solid #e8e8e8;}.step{color:#888;font-size:12px;margin:4px 0;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}img{width:200px;height:150px;object-fit:cover;border-radius:8px;border:1px solid #ddd;}</style></head><body>";
-          html+="<h1>"+selProj.name+" - Fotoğraf Raporu</h1><p>"+new Date().toLocaleDateString("tr-TR")+"</p>";
+          var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>@media print{.door{page-break-inside:avoid;}}body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;margin-bottom:4px;}.subtitle{color:#888;font-size:13px;margin-bottom:20px;}.door{background:#fff;border-radius:12px;padding:16px;margin:14px 0;border:1px solid #e8e8e8;}.doorhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e67e22;padding-bottom:8px;margin-bottom:8px;}.doorhead h2{color:#333;margin:0;font-size:18px;}.progress{font-size:20px;font-weight:bold;}.p100{color:#27ae60;}.p50{color:#e67e22;}.p0{color:#aaa;}.meta{color:#666;font-size:12px;margin:2px 0;}.stepbox{background:#fef9f4;border-left:3px solid #e67e22;padding:8px 12px;margin:10px 0;border-radius:0 8px 8px 0;}.stepname{font-weight:bold;color:#333;font-size:13px;}.stepdate{color:#888;font-size:11px;}.stepnote{color:#555;font-size:12px;font-style:italic;margin-top:2px;}.status-ready{color:#27ae60;font-weight:bold;}.status-notready{color:#e74c3c;font-weight:bold;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;}img{width:260px;height:195px;object-fit:cover;border-radius:8px;border:1px solid #ddd;}</style></head><body>";
+          html+="<h1>"+selProj.name+"</h1><div class='subtitle'>Fotoğraflı İlerleme Raporu · "+new Date().toLocaleDateString("tr-TR")+" "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
           var hasAny=false;
           doors.forEach(function(d2){
             var dSteps=getStepsForDoor(d2);
-            var doorPhotos=[];
-            dSteps.forEach(function(st){if(d2.steps&&d2.steps[st.id]&&d2.steps[st.id].photos){d2.steps[st.id].photos.forEach(function(ph){doorPhotos.push({step:st.label,photo:ph});});}});
-            if(doorPhotos.length>0){
+            var stepData=[];
+            var doneCount=0;
+            dSteps.forEach(function(st){
+              var sd=d2.steps&&d2.steps[st.id]?d2.steps[st.id]:{};
+              if(sd.done)doneCount++;
+              if((sd.photos&&sd.photos.length>0)||sd.notes||sd.siteStatus){
+                stepData.push({label:st.label,data:sd});
+              }
+            });
+            var pctVal=dSteps.length>0?Math.round(doneCount/dSteps.length*100):0;
+            if(stepData.length>0){
               hasAny=true;
-              html+="<div class='door'><h2>#"+d2.code+" — "+d2.kapiTipi+"</h2><p>📍 "+(d2.mahal||"")+"</p>";
-              doorPhotos.forEach(function(dp){html+="<div class='step'>"+dp.step+"</div><div class='photos'><img src='"+dp.photo.data+"'/></div>";});
+              var pcls=pctVal>=100?"p100":pctVal>0?"p50":"p0";
+              html+="<div class='door'><div class='doorhead'><h2>#"+d2.code+" — "+d2.kapiTipi+"</h2><span class='progress "+pcls+"'>%"+pctVal+"</span></div>";
+              html+="<div class='meta'>📍 "+(d2.mahal||"")+"</div>";
+              if(d2.assignedTo){var cn=getCarpName(d2.assignedTo);if(cn)html+="<div class='meta'>👷 "+cn+"</div>";}
+              stepData.forEach(function(sd2){
+                var s=sd2.data;
+                html+="<div class='stepbox'><div class='stepname'>"+sd2.label;
+                if(s.siteStatus==="ready")html+=" <span class='status-ready'>✅ Hazır</span>";
+                if(s.siteStatus==="not_ready")html+=" <span class='status-notready'>❌ Hazır Değil</span>";
+                if(s.done&&!s.siteStatus)html+=" <span class='status-ready'>✓</span>";
+                html+="</div>";
+                if(s.completedAt)html+="<div class='stepdate'>🕐 "+new Date(s.completedAt).toLocaleDateString("tr-TR")+" "+new Date(s.completedAt).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
+                if(s.notes)html+="<div class='stepnote'>📝 "+s.notes+"</div>";
+                if(s.photos&&s.photos.length>0){
+                  html+="<div class='photos'>";
+                  s.photos.forEach(function(ph){
+                    html+="<div><img src='"+ph.data+"'/>";
+                    if(ph.at)html+="<div class='stepdate'>"+new Date(ph.at).toLocaleDateString("tr-TR")+" "+new Date(ph.at).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
+                    html+="</div>";
+                  });
+                  html+="</div>";
+                }
+                html+="</div>";
+              });
               html+="</div>";
             }
           });
-          if(!hasAny)html+="<p>Henüz fotoğraf yok.</p>";
+          if(!hasAny)html+="<p>Henüz fotoğraf veya not girilmemiş.</p>";
           html+="</body></html>";
           var blob=new Blob([html],{type:"text/html"});
           var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Foto_Rapor.html";a.click();
