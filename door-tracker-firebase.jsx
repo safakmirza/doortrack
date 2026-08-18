@@ -83,7 +83,7 @@ var LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABBUAAAC3CAYAAABNGmbxAAAA
 var uid=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);};
 
 function pct(door){
-  var doorSteps=getStepsForDoor(door);var n=0;
+  var doorSteps=getStepsForDoor(door).filter(function(s){return s.id!=="site_check";});var n=0;
   doorSteps.forEach(function(s){if(door.steps&&door.steps[s.id]&&door.steps[s.id].done)n++;});
   return doorSteps.length>0?Math.round((n/doorSteps.length)*100):0;
 }
@@ -1179,7 +1179,7 @@ export default function App(){
                               <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:15,color:"#1a1a2a"}}>#{door.code}</span>
                               <span style={{background:s2.bg,color:s2.fg,fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:600,textTransform:"uppercase"}}>{s2.lb}</span>
                               {door.hwSetNo&&<span style={{fontSize:8,background:"#f0f0f5",color:"#888",padding:"2px 5px",borderRadius:3}}>{door.hwSetNo}</span>}
-                              {(function(){var ss2=((door.steps&&door.steps.site_check)||{});var s3=ss2.siteStatus||"";if(s3==="ready")return <span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>;if(s3==="not_ready")return <span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL</span>;return null;})()}
+                              {(function(){var ss2=((door.steps&&door.steps.site_check)||{});var s3=ss2.siteStatus||"";if(s3==="not_ready")return <span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL</span>;if(s3==="ready"&&p2===0)return <span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>;return null;})()}
                             </div>
                             <div style={{fontSize:12,color:"#888"}}>{door.kapiTipi}</div>
                             {door.mahal&&<div style={{fontSize:11,color:"#888"}}>📍 {door.mahal}</div>}
