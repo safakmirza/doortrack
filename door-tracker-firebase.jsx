@@ -749,10 +749,10 @@ function Ring(props){var prc=props.percent;var sz=props.size||48;var r=(sz-5)/2;
 
 function Photos(props){var photos=props.photos||[];var onAdd=props.onAdd;var onRemove=props.onRemove;var inputRef=useRef(null);var upS=useState(false);var uploading=upS[0],setUploading=upS[1];function handleFile(e){var f=e.target.files&&e.target.files[0];if(!f)return;setUploading(true);var reader=new FileReader();reader.onload=function(ev){var img=new window.Image();img.onload=function(){var maxW=2000;var maxH=2000;var w=img.width;var h=img.height;if(w>maxW){h=h*(maxW/w);w=maxW;}if(h>maxH){w=w*(maxH/h);h=maxH;}var canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,w,h);var dataUrl=canvas.toDataURL("image/jpeg",0.80);var photoId=uid();var path="photos/"+photoId+".jpg";var sRef2=storageRef(storage,path);uploadString(sRef2,dataUrl,"data_url").then(function(snap){return getDownloadURL(snap.ref);}).then(function(url){onAdd({id:photoId,data:url,name:f.name,at:Date.now()});setUploading(false);}).catch(function(err){console.error("Upload error:",err);alert("Foto yuklenemedi: "+err.message);setUploading(false);});};img.onerror=function(){alert("Foto okunamadi");setUploading(false);};img.src=ev.target.result;};reader.readAsDataURL(f);e.target.value="";}return(<div><input ref={inputRef} type="file" accept="image/*" capture="environment" onChange={handleFile} style={{display:"none"}}/><div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>{photos.map(function(p){return(<div key={p.id} style={{position:"relative",width:56,height:56,borderRadius:6,overflow:"hidden",border:"1px solid #ddd"}}><img src={p.data} style={{width:"100%",height:"100%",objectFit:"cover"}}/><div onClick={function(e){e.stopPropagation();onRemove(p.id);}} style={{position:"absolute",top:1,right:1,background:"#000a",color:"#e74c3c",width:16,height:16,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,cursor:"pointer"}}>✕</div></div>);})}{uploading?<span style={{fontSize:11,color:"#e67e22"}}>📤 Yükleniyor...</span>:<button onClick={function(){inputRef.current&&inputRef.current.click();}} style={{...B,background:"#fef5eb",color:"#e67e22",fontSize:11,padding:"6px 10px"}}>📸</button>}</div></div>);}
 
-function StepRow(props){var step=props.step;var data=props.data||{};var onToggle=props.onToggle;var onNote=props.onNote;var onIssue=props.onIssue;var onPhoto=props.onPhoto;var onRmPhoto=props.onRmPhoto;var origDone=props.origDone;var onSiteStatus=props.onSiteStatus;var expS=useState(false);var exp=expS[0],setExp=expS[1];var done=!!data.done;var hasIssue=!!data.issue;var isLocked=done&&origDone;var isSite=step.id==="site_check";var siteStatus=data.siteStatus||"";return(<div style={{background:"#ffffff",borderRadius:10,border:"1px solid "+(done?"#27ae6044":hasIssue?"#e74c3c44":siteStatus==="not_ready"?"#e74c3c44":"#222"),overflow:"hidden",marginBottom:6}}><div style={{display:"flex",alignItems:"center",padding:"10px 12px",gap:10,cursor:"pointer"}} onClick={function(){setExp(!exp);}}><div onClick={function(e){e.stopPropagation();if(!isSite)onToggle(step.id);}} style={{width:26,height:26,borderRadius:6,border:"2px solid "+(done?"#4aff7a":hasIssue||siteStatus==="not_ready"?"#ff6b4a":"#444"),background:done?"rgba(74,255,122,0.15)":siteStatus==="not_ready"?"rgba(255,107,74,0.1)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>{done&&<span style={{color:"#27ae60",fontSize:14,fontWeight:700}}>{isLocked?"🔒":"✓"}</span>}{isSite&&siteStatus==="not_ready"&&!done&&<span style={{color:"#e74c3c",fontSize:14,fontWeight:700}}>✕</span>}</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:done?"#4aff7a":siteStatus==="not_ready"?"#ff6b4a":hasIssue?"#ff6b4a":"#ccc"}}>{step.label}{isSite&&siteStatus==="ready"&&done?" — ✅ Hazır":""}{isSite&&siteStatus==="not_ready"?" — ❌ Hazır Değil":""}</div>{data.completedAt&&<div style={{fontSize:9,color:"#aaa",marginTop:1}}>{fmtD(data.completedAt)}</div>}</div><span style={{color:"#bbb",fontSize:12}}>{exp?"▲":"▼"}</span></div>{exp&&(<div style={{padding:"0 12px 12px",borderTop:"1px solid #e8e8e8"}}>{isSite&&(<div style={{display:"flex",gap:8,marginTop:8,marginBottom:8}}><button onClick={function(){onSiteStatus(step.id,"ready");onToggle(step.id);}} style={{...B,flex:1,background:siteStatus==="ready"?"#27ae60":"#f0faf3",color:siteStatus==="ready"?"#fff":"#27ae60",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #27ae60"}}>✅ Hazır</button><button onClick={function(){onSiteStatus(step.id,"not_ready");}} style={{...B,flex:1,background:siteStatus==="not_ready"?"#e74c3c":"#fde8e8",color:siteStatus==="not_ready"?"#fff":"#e74c3c",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #e74c3c"}}>❌ Hazır Değil</button></div>)}<div style={{marginTop:8}}><Photos photos={data.photos||[]} onAdd={function(p){onPhoto(step.id,p);}} onRemove={function(pid){onRmPhoto(step.id,pid);}}/></div><div style={{marginTop:8}}><textarea value={data.notes||""} onChange={function(e){onNote(step.id,e.target.value);}} placeholder={isSite?"Yer durumu notu... (sıva, ölçü, engel vs.)":"Not ekleyin..."} rows={2} style={{...INP,fontSize:12,resize:"vertical"}}/></div>{!isSite&&<button onClick={function(){onIssue(step.id,!hasIssue);}} style={{...B,marginTop:6,background:hasIssue?"#fde8e8":"#1a1a2a",color:hasIssue?"#ff6b4a":"#888",fontSize:11,padding:"6px 10px",border:"1px solid "+(hasIssue?"#e74c3c44":"#333")}}>{hasIssue?"⚠️ Sorun İşaretli — Kaldır":"⚠️ Sorun Bildir"}</button>}</div>)}</div>);}
+function StepRow(props){var step=props.step;var data=props.data||{};var readOnly=props.readOnly;var onToggle=props.onToggle;var onNote=props.onNote;var onIssue=props.onIssue;var onPhoto=props.onPhoto;var onRmPhoto=props.onRmPhoto;var origDone=props.origDone;var onSiteStatus=props.onSiteStatus;var expS=useState(false);var exp=expS[0],setExp=expS[1];var done=!!data.done;var hasIssue=!!data.issue;var isLocked=done&&origDone;var isSite=step.id==="site_check";var siteStatus=data.siteStatus||"";return(<div style={{background:"#ffffff",borderRadius:10,border:"1px solid "+(done?"#27ae6044":hasIssue?"#e74c3c44":siteStatus==="not_ready"?"#e74c3c44":"#222"),overflow:"hidden",marginBottom:6}}><div style={{display:"flex",alignItems:"center",padding:"10px 12px",gap:10,cursor:"pointer"}} onClick={function(){setExp(!exp);}}><div onClick={function(e){e.stopPropagation();if(!isSite&&!readOnly)onToggle(step.id);}} style={{width:26,height:26,borderRadius:6,border:"2px solid "+(done?"#4aff7a":hasIssue||siteStatus==="not_ready"?"#ff6b4a":"#444"),background:done?"rgba(74,255,122,0.15)":siteStatus==="not_ready"?"rgba(255,107,74,0.1)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>{done&&<span style={{color:"#27ae60",fontSize:14,fontWeight:700}}>{isLocked?"🔒":"✓"}</span>}{isSite&&siteStatus==="not_ready"&&!done&&<span style={{color:"#e74c3c",fontSize:14,fontWeight:700}}>✕</span>}</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:done?"#4aff7a":siteStatus==="not_ready"?"#ff6b4a":hasIssue?"#ff6b4a":"#ccc"}}>{step.label}{isSite&&siteStatus==="ready"&&done?" — ✅ Hazır":""}{isSite&&siteStatus==="not_ready"?" — ❌ Hazır Değil":""}</div>{data.completedAt&&<div style={{fontSize:9,color:"#aaa",marginTop:1}}>{fmtD(data.completedAt)}</div>}</div><span style={{color:"#bbb",fontSize:12}}>{exp?"▲":"▼"}</span></div>{exp&&(<div style={{padding:"0 12px 12px",borderTop:"1px solid #e8e8e8"}}>{isSite&&(<div style={{display:"flex",gap:8,marginTop:8,marginBottom:8}}><button onClick={function(){onSiteStatus(step.id,"ready");}} style={{...B,flex:1,background:siteStatus==="ready"?"#27ae60":"#f0faf3",color:siteStatus==="ready"?"#fff":"#27ae60",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #27ae60"}}>✅ Hazır</button><button onClick={function(){onSiteStatus(step.id,"not_ready");}} style={{...B,flex:1,background:siteStatus==="not_ready"?"#e74c3c":"#fde8e8",color:siteStatus==="not_ready"?"#fff":"#e74c3c",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #e74c3c"}}>❌ Hazır Değil</button></div>)}{!readOnly&&<div style={{marginTop:8}}><Photos photos={data.photos||[]} onAdd={function(p){onPhoto(step.id,p);}} onRemove={function(pid){onRmPhoto(step.id,pid);}}/></div>}{readOnly&&data.photos&&data.photos.length>0&&(<div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>{data.photos.map(function(p){return <img key={p.id} src={p.data} style={{width:56,height:56,objectFit:"cover",borderRadius:6,border:"1px solid #ddd"}}/>;})}</div>)}{!readOnly&&<div style={{marginTop:8}}><textarea value={data.notes||""} onChange={function(e){onNote(step.id,e.target.value);}} placeholder={isSite?"Yer durumu notu... (sıva, ölçü, engel vs.)":"Not ekleyin..."} rows={2} style={{...INP,fontSize:12,resize:"vertical"}}/></div>}{readOnly&&data.notes&&<div style={{marginTop:8,fontSize:12,color:"#888",background:"#f7f7f7",borderRadius:8,padding:"8px 10px"}}>📝 {data.notes}</div>}{!isSite&&!readOnly&&<button onClick={function(){onIssue(step.id,!hasIssue);}} style={{...B,marginTop:6,background:hasIssue?"#fde8e8":"#1a1a2a",color:hasIssue?"#ff6b4a":"#888",fontSize:11,padding:"6px 10px",border:"1px solid "+(hasIssue?"#e74c3c44":"#333")}}>{hasIssue?"⚠️ Sorun İşaretli — Kaldır":"⚠️ Sorun Bildir"}</button>}</div>)}</div>);}
 
 function DetailView(props){
-  var door=props.door;var carps=props.carpenters;var isAdmin=props.isAdmin;
+  var door=props.door;var carps=props.carpenters;var isAdmin=props.isAdmin;var empMode=props.empMode;var empName=props.empName;
   var projName=props.projectName;var onUpdate=props.onUpdate;var onBack=props.onBack;
   var catalog=props.catalog||[];
   var catImages=props.catImages||{};
@@ -768,9 +768,9 @@ function DetailView(props){
   function addPhoto(sid,photo){var steps=Object.assign({},edit.steps);var cur=steps[sid]||{};steps[sid]=Object.assign({},cur,{photos:(cur.photos||[]).concat([photo])});setEdit(Object.assign({},edit,{steps:steps}));setDirty(true);setSaved(false);}
   function rmPhoto(sid,pid){var steps=Object.assign({},edit.steps);var cur=steps[sid]||{};steps[sid]=Object.assign({},cur,{photos:(cur.photos||[]).filter(function(x){return x.id!==pid;})});setEdit(Object.assign({},edit,{steps:steps}));setDirty(true);setSaved(false);}
   function handleToggle(sid){var cur=(edit.steps&&edit.steps[sid])||{};if(cur.done){var od=door.steps&&door.steps[sid]&&door.steps[sid].done;if(od){setReverseConfirm({stepId:sid});}else{updStep(sid,{done:false});}return;}var missing=getMissingDeps(sid,edit.steps||{},edit);if(missing.length>0){setDepConfirm({stepId:sid,missing:missing});}else{updStep(sid,{done:true});}}
-  function doReverse(sid,reason){var steps=Object.assign({},edit.steps);var cur=steps[sid]||{};steps[sid]=Object.assign({},cur,{done:false,updatedAt:Date.now()});delete steps[sid].completedAt;var log=(edit.changeLog||[]).concat([{step:getStepLabel(sid),action:"reversed",reason:reason,by:isAdmin?"Admin":(carp?carp.name:"Usta"),at:Date.now()}]);setEdit(Object.assign({},edit,{steps:steps,changeLog:log}));setDirty(true);setSaved(false);setReverseConfirm(null);}
+  function doReverse(sid,reason){var steps=Object.assign({},edit.steps);var cur=steps[sid]||{};steps[sid]=Object.assign({},cur,{done:false,updatedAt:Date.now()});delete steps[sid].completedAt;var log=(edit.changeLog||[]).concat([{step:getStepLabel(sid),action:"reversed",reason:reason,by:isAdmin?"Admin":(empMode?((empName||"İşveren")+" (İşveren)"):(carp?carp.name:"Usta")),at:Date.now()}]);setEdit(Object.assign({},edit,{steps:steps,changeLog:log}));setDirty(true);setSaved(false);setReverseConfirm(null);}
   function completeWithDeps(sid,mids){var steps=Object.assign({},edit.steps);var now=Date.now();for(var i=0;i<mids.length;i++){var cur=steps[mids[i]]||{};steps[mids[i]]=Object.assign({},cur,{done:true,completedAt:now,updatedAt:now});}var tc=steps[sid]||{};steps[sid]=Object.assign({},tc,{done:true,completedAt:now,updatedAt:now});setEdit(Object.assign({},edit,{steps:steps}));setDirty(true);setSaved(false);setDepConfirm(null);}
-  function doSave(){var log=edit.changeLog||[];var byN=isAdmin?"Admin":(carp?carp.name:"Usta");var now=Date.now();var doorSteps=getStepsForDoor(edit);doorSteps.forEach(function(step){var ed=edit.steps&&edit.steps[step.id]&&edit.steps[step.id].done;var od=door.steps&&door.steps[step.id]&&door.steps[step.id].done;if(ed&&!od)log.push({step:step.label,action:"completed",reason:"",by:byN,at:now});});var final=Object.assign({},edit,{changeLog:log,lastSavedAt:now});onUpdate(final);setEdit(final);setDirty(false);setSaved(true);setTimeout(function(){setSaved(false);},3000);}
+  function doSave(){var log=edit.changeLog||[];var byN=isAdmin?"Admin":(empMode?((empName||"İşveren")+" (İşveren)"):(carp?carp.name:"Usta"));var now=Date.now();var doorSteps=getStepsForDoor(edit);doorSteps.forEach(function(step){var ed=edit.steps&&edit.steps[step.id]&&edit.steps[step.id].done;var od=door.steps&&door.steps[step.id]&&door.steps[step.id].done;if(ed&&!od)log.push({step:step.label,action:"completed",reason:"",by:byN,at:now});});var final=Object.assign({},edit,{changeLog:log,lastSavedAt:now});onUpdate(final);setEdit(final);setDirty(false);setSaved(true);setTimeout(function(){setSaved(false);},3000);}
   function getCat(code){var f=null;catalog.forEach(function(c){if(c.code===code)f=c;});return f;}
   var dims=[];if(edit.w)dims.push(edit.w);if(edit.h)dims.push(edit.h);var dimStr=dims.join("×");if(edit.d)dimStr+=(dimStr?" · ":"")+edit.d;
   var kasaDims="";if(edit.kw)kasaDims=edit.kw+(edit.kh?"×"+edit.kh:"");
@@ -825,7 +825,7 @@ function DetailView(props){
       {!isAdmin&&edit.notes&&<div style={{background:"#f0f4ff",borderRadius:8,padding:"8px 12px",marginBottom:14,fontSize:12,color:"#888",border:"1px solid #e8e8e8"}}>📝 {edit.notes}</div>}
 
       <div style={{...LBL,marginBottom:8}}>Montaj Adımları</div>
-      {(function(){var doorSteps=getStepsForDoor(edit);return Object.keys(GROUPS).map(function(gk){var gs=doorSteps.filter(function(s2){return s2.group===gk;});if(gs.length===0)return null;return(<div key={gk} style={{marginBottom:12}}><div style={{fontSize:11,fontWeight:600,color:"#aaa",marginBottom:4}}>{GROUPS[gk]}</div>{gs.map(function(step){var od=door.steps&&door.steps[step.id]&&door.steps[step.id].done;return <StepRow key={step.id} step={step} data={(edit.steps&&edit.steps[step.id])||{}} onToggle={handleToggle} origDone={od} onNote={function(sid,v){updStep(sid,{notes:v});}} onIssue={function(sid,v){updStep(sid,{issue:v});}} onPhoto={addPhoto} onRmPhoto={rmPhoto} isAdmin={isAdmin} onSiteStatus={function(sid,status){updStep(sid,{siteStatus:status});}}/>;})}</div>);});})()}
+      {(function(){var doorSteps=getStepsForDoor(edit);return Object.keys(GROUPS).map(function(gk){var gs=doorSteps.filter(function(s2){return s2.group===gk;});if(gs.length===0)return null;return(<div key={gk} style={{marginBottom:12}}><div style={{fontSize:11,fontWeight:600,color:"#aaa",marginBottom:4}}>{GROUPS[gk]}</div>{gs.map(function(step){var od=door.steps&&door.steps[step.id]&&door.steps[step.id].done;return <StepRow key={step.id} step={step} readOnly={empMode&&step.id!=="site_check"} data={(edit.steps&&edit.steps[step.id])||{}} onToggle={handleToggle} origDone={od} onNote={function(sid,v){updStep(sid,{notes:v});}} onIssue={function(sid,v){updStep(sid,{issue:v});}} onPhoto={addPhoto} onRmPhoto={rmPhoto} isAdmin={isAdmin} onSiteStatus={function(sid,status){if(status==="ready"){updStep(sid,{siteStatus:status,done:true});}else{updStep(sid,{siteStatus:status,done:false});}}}/>;})}</div>);});})()}
       {edit.changeLog&&edit.changeLog.length>0&&(<div style={{marginBottom:14}}><div style={{...LBL,marginBottom:6}}>Değişiklik Geçmişi</div><div style={{background:"#ffffff",borderRadius:10,border:"1px solid #e8e8e8",overflow:"hidden"}}>{edit.changeLog.slice(-10).reverse().map(function(lg,idx){var ic=lg.action==="completed"?"✅":"🔄";return(<div key={idx} style={{padding:"8px 12px",borderBottom:"1px solid #e8e8e8",fontSize:11}}><div><span style={{color:lg.action==="completed"?"#4aff7a":"#ff6b4a",fontWeight:600}}>{ic} {lg.step}</span><span style={{color:"#888"}}> — {lg.action==="completed"?"Tamamlandı":lg.reason}</span></div><div style={{color:"#aaa",fontSize:10,marginTop:2}}>{lg.by} — {fmtD(lg.at)}</div></div>);})}</div></div>)}
 
       <div style={{position:"fixed",bottom:0,left:0,right:0,padding:"12px 16px",background:"linear-gradient(transparent,#f4f4f4 30%)",zIndex:50,maxWidth:500,margin:"0 auto"}}>
@@ -841,29 +841,34 @@ function DetailView(props){
 }
 
 function LoginScreen(props){
-  var carps=props.carpenters;var mS=useState(null);var mode=mS[0],setMode=mS[1];
+  var carps=props.carpenters;var emps=props.employers||[];var mS=useState(null);var mode=mS[0],setMode=mS[1];
   var emailS=useState("");var email=emailS[0],setEmail=emailS[1];
   var passS=useState("");var pass=passS[0],setPass=passS[1];
   var carpPassS=useState("");var carpPass=carpPassS[0],setCarpPass=carpPassS[1];
   var carpNameS=useState("");var carpName=carpNameS[0],setCarpName=carpNameS[1];
+  var empNameS=useState("");var empName=empNameS[0],setEmpName=empNameS[1];
+  var empPassS=useState("");var empPass=empPassS[0],setEmpPass=empPassS[1];
   var errS=useState("");var err=errS[0],setErr=errS[1];
   function doAdmin(){if(email==="safak@doorsmar.com"&&pass==="1234"){props.onLoginAdmin();}else{setErr("Hatalı email veya şifre");setTimeout(function(){setErr("");},2000);}}
   function doCarp(){var found=null;carps.forEach(function(c){if(c.pin&&c.pin.toLowerCase()===carpName.toLowerCase()&&c.pin.toLowerCase()===carpPass.toLowerCase())found=c;});if(!found){setErr("Hatalı isim veya şifre");setTimeout(function(){setErr("");},2000);return;}props.onLoginCarpenter(found);}
+  function doEmp(){var found=null;emps.forEach(function(em){if(em.name&&em.name.trim().toLowerCase()===empName.trim().toLowerCase()&&em.pin&&em.pin.toLowerCase()===empPass.toLowerCase())found=em;});if(!found){setErr("Hatalı isim veya şifre");setTimeout(function(){setErr("");},2000);return;}props.onLoginEmployer(found);}
   return(
     <div style={{minHeight:"100vh",background:"#f4f4f4",display:"flex",flexDirection:"column",alignItems:"center",padding:20}}>
       <div style={{maxWidth:360,width:"100%",display:"flex",flexDirection:"column",alignItems:"center"}}>
         <div style={{textAlign:"center",marginTop:40,marginBottom:40}}><img src={LOGO} style={{width:200,marginBottom:16}} alt="Doorsmar"/></div>
         <div style={{textAlign:"center",marginBottom:32}}><div style={{fontFamily:"'JetBrains Mono'",fontSize:20,fontWeight:800,color:"#333",letterSpacing:2}}>KAPI<span style={{color:"#e67e22"}}>TAKİP</span></div><div style={{fontSize:11,color:"#aaa",marginTop:4,letterSpacing:2}}>MONTAJ TAKİP SİSTEMİ</div></div>
         {err&&<div style={{background:"#fde8e8",border:"1px solid #e74c3c44",borderRadius:10,padding:"10px 14px",marginBottom:12,textAlign:"center",color:"#e74c3c",fontSize:12}}>{err}</div>}
-        {!mode&&(<div style={{display:"flex",flexDirection:"column",gap:10,width:"100%"}}><button onClick={function(){setMode("admin");}} style={{...B,background:"#fff",color:"#e67e22",padding:18,fontSize:15,border:"2px solid #e67e22",borderRadius:14,boxShadow:"0 2px 8px rgba(230,126,34,0.15)"}}><div style={{fontWeight:700}}>🛠 Yönetici Girişi</div></button><button onClick={function(){setMode("carp");}} style={{...B,background:"#fff",color:"#27ae60",padding:18,fontSize:15,border:"2px solid #27ae60",borderRadius:14,boxShadow:"0 2px 8px rgba(39,174,96,0.15)"}}><div style={{fontWeight:700}}>👷 Usta Girişi</div></button></div>)}
+        {!mode&&(<div style={{display:"flex",flexDirection:"column",gap:10,width:"100%"}}><button onClick={function(){setMode("admin");}} style={{...B,background:"#fff",color:"#e67e22",padding:18,fontSize:15,border:"2px solid #e67e22",borderRadius:14,boxShadow:"0 2px 8px rgba(230,126,34,0.15)"}}><div style={{fontWeight:700}}>🛠 Yönetici Girişi</div></button><button onClick={function(){setMode("carp");}} style={{...B,background:"#fff",color:"#27ae60",padding:18,fontSize:15,border:"2px solid #27ae60",borderRadius:14,boxShadow:"0 2px 8px rgba(39,174,96,0.15)"}}><div style={{fontWeight:700}}>👷 Usta Girişi</div></button><button onClick={function(){setMode("emp");}} style={{...B,background:"#fff",color:"#2a7fff",padding:18,fontSize:15,border:"2px solid #2a7fff",borderRadius:14,boxShadow:"0 2px 8px rgba(42,127,255,0.15)"}}><div style={{fontWeight:700}}>🏢 İşveren Girişi</div></button></div>)}
         {mode==="admin"&&(<div style={{width:"100%"}}><div style={{fontSize:10,color:"#888",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Yönetici Girişi</div><input type="email" value={email} onChange={function(e){setEmail(e.target.value);}} placeholder="Email" style={{...INP,marginBottom:8}} autoComplete="email"/><input type="password" value={pass} onChange={function(e){setPass(e.target.value);}} placeholder="Şifre" style={{...INP,marginBottom:10}} onKeyDown={function(e){if(e.key==="Enter")doAdmin();}}/><button onClick={doAdmin} style={{...B,width:"100%",background:"#e67e22",color:"#fff",padding:14,fontSize:15,borderRadius:10}}>Giriş</button><button onClick={function(){setMode(null);setEmail("");setPass("");}} style={{...B,width:"100%",background:"transparent",color:"#aaa",padding:10,fontSize:12,marginTop:6}}>← Geri</button></div>)}
         {mode==="carp"&&(<div style={{width:"100%"}}><div style={{fontSize:10,color:"#888",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>Usta Girişi</div><input type="text" value={carpName} onChange={function(e){setCarpName(e.target.value);}} placeholder="İsim" style={{...INP,marginBottom:8,textAlign:"center",fontSize:16}} autoCapitalize="none" autoComplete="off"/><input type="password" value={carpPass} onChange={function(e){setCarpPass(e.target.value);}} placeholder="Şifre" style={{...INP,marginBottom:10,textAlign:"center",fontSize:16}} onKeyDown={function(e){if(e.key==="Enter")doCarp();}}/><button onClick={doCarp} style={{...B,width:"100%",background:"#27ae60",color:"#fff",padding:14,fontSize:15,borderRadius:10}}>Giriş</button><button onClick={function(){setMode(null);setCarpName("");setCarpPass("");}} style={{...B,width:"100%",background:"transparent",color:"#aaa",padding:10,fontSize:12,marginTop:6}}>← Geri</button></div>)}
+        {mode==="emp"&&(<div style={{width:"100%"}}><div style={{fontSize:10,color:"#888",textTransform:"uppercase",letterSpacing:1,marginBottom:8}}>İşveren Girişi</div><input type="text" value={empName} onChange={function(e){setEmpName(e.target.value);}} placeholder="İsim" style={{...INP,marginBottom:8,textAlign:"center",fontSize:16}} autoCapitalize="none" autoComplete="off"/><input type="password" value={empPass} onChange={function(e){setEmpPass(e.target.value);}} placeholder="Şifre" style={{...INP,marginBottom:10,textAlign:"center",fontSize:16}} onKeyDown={function(e){if(e.key==="Enter")doEmp();}}/><button onClick={doEmp} style={{...B,width:"100%",background:"#2a7fff",color:"#fff",padding:14,fontSize:15,borderRadius:10}}>Giriş</button><button onClick={function(){setMode(null);setEmpName("");setEmpPass("");}} style={{...B,width:"100%",background:"transparent",color:"#aaa",padding:10,fontSize:12,marginTop:6}}>← Geri</button></div>)}
       </div>
     </div>
   );
 }
 
 function AddCarpForm(props){var nS=useState("");var nm=nS[0],sNm=nS[1];var cS=useState("");var cid=cS[0],sCid=cS[1];var pS=useState("");var pn=pS[0],sPn=pS[1];function add(){if(!nm.trim()||!pn.trim())return;props.onAdd({id:uid(),name:nm.trim(),cid:cid.trim()||"C-"+Math.floor(Math.random()*90+10),pin:pn.trim()});sNm("");sCid("");sPn("");}return(<div style={{background:"#ffffff",borderRadius:12,padding:12,border:"1px solid #e8e8e8",marginTop:12}}><div style={{fontSize:11,color:"#888",marginBottom:8,fontWeight:600}}>Usta Ekle</div><input value={nm} onChange={function(e){sNm(e.target.value);}} placeholder="Ad Soyad" style={{...INP,marginBottom:6,fontSize:12}}/><div style={{display:"flex",gap:6}}><input value={cid} onChange={function(e){sCid(e.target.value);}} placeholder="Kod (C-03)" style={{...INP,fontSize:12,flex:1}}/><input value={pn} onChange={function(e){sPn(e.target.value);}} placeholder="Şifre (zorunlu)" style={{...INP,fontSize:12,flex:1}}/><button onClick={add} style={{...B,background:"#e67e22",color:"#ffffff",fontSize:12,whiteSpace:"nowrap"}}>+</button></div></div>);}
+function AddEmpForm(props){var projects=props.projects||[];var nS=useState("");var nm=nS[0],sNm=nS[1];var pS=useState("");var pn=pS[0],sPn=pS[1];var pjS=useState({});var pj=pjS[0],sPj=pjS[1];function add(){if(!nm.trim()||!pn.trim())return;var ids=[];Object.keys(pj).forEach(function(k){if(pj[k])ids.push(k);});if(ids.length===0){alert("En az bir proje seçin");return;}props.onAdd({id:uid(),name:nm.trim(),pin:pn.trim(),projIds:ids});sNm("");sPn("");sPj({});}return(<div style={{background:"#ffffff",borderRadius:12,padding:12,border:"1px solid #e8e8e8",marginTop:12}}><div style={{fontSize:11,color:"#888",marginBottom:8,fontWeight:600}}>İşveren Ekle</div><input value={nm} onChange={function(e){sNm(e.target.value);}} placeholder="Ad Soyad" style={{...INP,fontSize:12,marginBottom:6}}/><input value={pn} onChange={function(e){sPn(e.target.value);}} placeholder="Şifre" style={{...INP,fontSize:12,marginBottom:8}}/><div style={{fontSize:10,color:"#888",marginBottom:6}}>Görebileceği projeler:</div><div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>{projects.map(function(pr){var on=!!pj[pr.id];return <span key={pr.id} onClick={function(){var n=Object.assign({},pj);n[pr.id]=!on;sPj(n);}} style={{fontSize:11,padding:"5px 10px",borderRadius:6,cursor:"pointer",background:on?"#2a7fff":"#f0f0f5",color:on?"#fff":"#888",border:"1px solid "+(on?"#2a7fff":"#ddd"),fontWeight:on?600:400}}>{on?"✓ ":""}{pr.name}</span>;})}</div><button onClick={add} style={{...B,width:"100%",background:"#2a7fff",color:"#ffffff",fontSize:12,padding:10}}>+ İşveren Ekle</button></div>);}
 
 export default function App(){
   var pS=useState([]);var projects=pS[0],setProjects=pS[1];
@@ -890,9 +895,12 @@ export default function App(){
   var catImgRef=useRef(null);
   var catImgTargetRef=useRef("");
   var remoteUpdate=useRef(false);
+  var listScrollRef=useRef(0);
+  var empsS=useState([]);var emps=empsS[0],setEmps=empsS[1];
+  var sfS=useState("all");var siteFilter=sfS[0],setSiteFilter=sfS[1];
 
   useEffect(function(){
-    Promise.all([loadProjects(),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices")]).then(function(res){
+    Promise.all([loadProjects(),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices"),sGet("dtv7-emp")]).then(function(res){
       remoteUpdate.current=true;
       var loadedProj=res[0]&&res[0].length>0?res[0]:[SIGMA_PROJECT];
       var defaults=[SIGMA_PROJECT];
@@ -902,6 +910,7 @@ export default function App(){
       setCatalog(res[2]&&res[2].length>0?res[2]:DEFAULT_CATALOG);
       setCatImages(res[3]&&Object.keys(res[3]).length>0?res[3]:DEFAULT_CAT_IMAGES);
       setPrices(res[4]&&Object.keys(res[4]).length>0?res[4]:DEFAULT_PRICES);
+      setEmps(res[5]&&res[5].length>0?res[5]:[]);
       setReady(true);
       setTimeout(function(){remoteUpdate.current=false;},500);
     });
@@ -912,8 +921,11 @@ export default function App(){
   useEffect(function(){if(ready&&!remoteUpdate.current){saveProjectIndex(projects);projects.forEach(function(p){saveProject(p);});}},[projects,ready]);
   useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-carp",carps);},[carps,ready]);
   useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-cat",catalog);},[catalog,ready]);
+  useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-emp",emps);},[emps,ready]);
 
   var isAdmin=user&&user.role==="admin";
+  var isEmp=user&&user.role==="employer";
+  useEffect(function(){if(view==="doorDetail"){window.scrollTo(0,0);}else if(view==="projectDoors"){var y=listScrollRef.current;setTimeout(function(){window.scrollTo(0,y);},60);}},[view]);
   var selProj=null;projects.forEach(function(p){if(p.id===selProjId)selProj=p;});
   var selDoor=null;
   if(selProj&&selProj.doors){selProj.doors.forEach(function(d){if(d.id===selDoorId)selDoor=d;});}
@@ -928,8 +940,8 @@ export default function App(){
   }
 
   var showBack=view!=="projects";
-  var headerBg=isAdmin?"linear-gradient(135deg,#fef5eb,#f8ece0)":"linear-gradient(135deg,#edf8f0,#e8f4eb)";
-  var headerBorder=isAdmin?"#e67e2244":"#27ae6044";
+  var headerBg=isAdmin?"linear-gradient(135deg,#fef5eb,#f8ece0)":(isEmp?"linear-gradient(135deg,#eaf1ff,#dfeaff)":"linear-gradient(135deg,#edf8f0,#e8f4eb)");
+  var headerBorder=isAdmin?"#e67e2244":(isEmp?"#2a7fff44":"#27ae6044");
 
   function bulkAssign(doorIds,carpId){
     setProjects(function(prev){
@@ -992,7 +1004,7 @@ export default function App(){
   function projPct(doors){if(!doors.length)return 0;var total=0;doors.forEach(function(d2){total+=pct(d2);});return Math.round(total/doors.length);}
 
   if(!ready)return <div style={{minHeight:"100vh",background:"#f4f4f4",display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{color:"#e67e22",fontFamily:"monospace"}}>Yükleniyor…</div></div>;
-  if(!user)return <LoginScreen carpenters={carps} onLoginAdmin={function(){setUser({role:"admin"});}} onLoginCarpenter={function(c){setUser({role:"carpenter",id:c.id,name:c.name});}}/>;
+  if(!user)return <LoginScreen carpenters={carps} employers={emps} onLoginAdmin={function(){setUser({role:"admin"});}} onLoginCarpenter={function(c){setUser({role:"carpenter",id:c.id,name:c.name});}} onLoginEmployer={function(em){setUser({role:"employer",id:em.id,name:em.name});}}/>;
 
   return(
     <div style={{minHeight:"100vh",background:"#f4f4f4",color:"#333",fontFamily:"'Outfit',sans-serif",maxWidth:500,margin:"0 auto",paddingBottom:80}}>
@@ -1009,7 +1021,7 @@ export default function App(){
             <div>
               <div style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:14,color:"#333",letterSpacing:1}}>KAPI<span style={{color:"#e67e22"}}>TAKİP</span></div>
               <div style={{fontSize:9,color:"#999",letterSpacing:1}}>
-                {isAdmin?"🛠 YÖNETİCİ":"👷 "+user.name}
+                {isAdmin?"🛠 YÖNETİCİ":(isEmp?"🏢 "+user.name:"👷 "+user.name)}
                 {selProj&&(view==="projectDoors"||view==="doorDetail"||view==="assignDoors"||view==="report"||view==="hakedis"||view==="qrLabels")?" • "+selProj.name:""}
               </div>
             </div>
@@ -1028,7 +1040,7 @@ export default function App(){
                     <button onClick={function(){go("report");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📊 Proje Raporu</button>
                     <button onClick={function(){go("hakedis");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>💰 Hakediş</button>
                     <button onClick={function(){go("qrLabels");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🏷 QR Etiketleri</button>
-                    <button onClick={function(){var data={"dtv7-proj":JSON.stringify(projects),"dtv7-carp":JSON.stringify(carps),"dtv7-cat":JSON.stringify(catalog),"dtv7-cimg":JSON.stringify(catImages),"dtv7-prices":JSON.stringify(prices)};var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
+                    <button onClick={function(){var data={"dtv7-proj":JSON.stringify(projects),"dtv7-carp":JSON.stringify(carps),"dtv7-cat":JSON.stringify(catalog),"dtv7-cimg":JSON.stringify(catImages),"dtv7-prices":JSON.stringify(prices),"dtv7-emp":JSON.stringify(emps)};var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
                     <button onClick={function(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(ev){try{var data=JSON.parse(ev.target.result);var keys=Object.keys(data);var promises=keys.map(function(k){return sSet(k,JSON.parse(data[k]));});Promise.all(promises).then(function(){window.location.reload();});}catch(err){alert("Hatalı dosya");}};rd.readAsText(f);};inp.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#2a7fff",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Veri Geri Yükle</button>
                     <button onClick={function(){if(window.confirm("Tüm kapılar silinsin mi?")){setProjects(function(p){var next=p.map(function(proj){if(proj.id!==selProjId)return proj;return Object.assign({},proj,{doors:[]});});return next;});setMenuOpen(false);}}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",color:"#e74c3c",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗑 Kapıları Temizle</button>
                   </div>
@@ -1047,27 +1059,26 @@ export default function App(){
       {toast&&(<div style={{margin:"12px 16px 0",padding:"12px 16px",borderRadius:10,background:toast.ok?"#e8f8ee":"#fde8e8",border:"1px solid "+(toast.ok?"#4aff7a44":"#ff6b4a44")}}><div style={{fontSize:13,color:toast.ok?"#4aff7a":"#ff6b4a",fontWeight:600}}>{toast.msg}</div></div>)}
 
       {/* ADMIN: PROJECTS LIST */}
-      {isAdmin&&view==="projects"&&(
+      {(isAdmin||isEmp)&&view==="projects"&&(
         <div style={{padding:16}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
             <div style={{fontSize:18,fontWeight:700,color:"#1a1a2a"}}>🏗 Projeler</div>
-            <div style={{display:"flex",gap:6}}>
+            {isAdmin&&<div style={{display:"flex",gap:6}}>
               <button onClick={function(){go("dashboard");}} style={{...B,background:"#fef5eb",color:"#e67e22",fontSize:11,padding:"7px 12px"}}>📊 Dashboard</button>
               <button onClick={function(){go("hwCatalog");}} style={{...B,background:"#fef5eb",color:"#e67e22",fontSize:11,padding:"7px 12px"}}>📦 Catalog</button>
-            </div>
+            </div>}
           </div>
-          <div style={{background:"#ffffff",borderRadius:12,padding:12,marginBottom:14,border:"1px solid #e8e8e8"}}>
+          {isAdmin&&<div style={{background:"#ffffff",borderRadius:12,padding:12,marginBottom:14,border:"1px solid #e8e8e8"}}>
             <input value={projForm.name} onChange={function(e){setProjForm(Object.assign({},projForm,{name:e.target.value}));}} placeholder="Yeni Proje Adı" style={{...INP,marginBottom:6,fontSize:13}}/>
             <input value={projForm.location} onChange={function(e){setProjForm(Object.assign({},projForm,{location:e.target.value}));}} placeholder="Konum (isteğe bağlı)" style={{...INP,marginBottom:8,fontSize:12}}/>
             <button onClick={addProject} style={{...B,width:"100%",background:"#e67e22",color:"#ffffff",padding:12}}>➕ Proje Oluştur</button>
-          </div>
-          {projects.length===0&&<div style={{textAlign:"center",color:"#888",padding:30}}>Henüz proje yok</div>}
+          </div>}
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            {projects.map(function(proj){
+            {(function(){var vis=projects;if(isEmp){var me=null;emps.forEach(function(e2){if(e2.id===user.id)me=e2;});vis=projects.filter(function(pr){return me&&(me.projIds||[]).indexOf(pr.id)>=0;});}if(vis.length===0)return <div style={{textAlign:"center",color:"#888",padding:30}}>{isEmp?"Size atanmış proje yok. Yöneticinizle iletişime geçin.":"Henüz proje yok"}</div>;return vis.map(function(proj){
               var ps=projStats(proj.doors||[]);var pp=projPct(proj.doors||[]);
               return(
                 <div key={proj.id} style={{background:"#ffffff",borderRadius:14,padding:16,border:"1px solid #e8e8e8",borderLeft:"4px solid #c9a227"}}>
-                  <div onClick={function(){setSelProjId(proj.id);go("projectDoors");}} style={{cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                  <div onClick={function(){listScrollRef.current=0;setSelProjId(proj.id);go("projectDoors");}} style={{cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                     <div>
                       <div style={{fontSize:16,fontWeight:700,color:"#1a1a2a"}}>{proj.name}</div>
                       {proj.location&&<div style={{fontSize:11,color:"#999",marginTop:2}}>📍 {proj.location}</div>}
@@ -1075,25 +1086,25 @@ export default function App(){
                     </div>
                     <Ring percent={pp} size={48}/>
                   </div>
-                  <div style={{display:"flex",justifyContent:"flex-end",marginTop:8}}>
+                  {isAdmin&&<div style={{display:"flex",justifyContent:"flex-end",marginTop:8}}>
                     <button onClick={function(e){e.stopPropagation();if(window.confirm("Proje silinsin mi: '"+proj.name+"' and all its doors?")){setProjects(function(p){var n=p.filter(function(x){return x.id!==proj.id;});return n;});}}} style={{...B,background:"#fde8e8",color:"#e74c3c",fontSize:10,padding:"5px 10px"}}>🗑 Sil</button>
-                  </div>
+                  </div>}
                 </div>
               );
-            })}
+            });})()}
           </div>
         </div>
       )}
 
       {/* ADMIN: PROJECT DOORS */}
-      {isAdmin&&view==="projectDoors"&&selProj&&(
+      {(isAdmin||isEmp)&&view==="projectDoors"&&selProj&&(
         <div style={{padding:16}}>
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:16}}>
             {[{l:"Toplam",v:projStats(selProj.doors||[]).total,c:"#fff"},{l:"Bitti",v:projStats(selProj.doors||[]).done,c:"#4aff7a"},{l:"Aktif",v:projStats(selProj.doors||[]).active,c:"#4da6ff"},{l:"Sorun",v:projStats(selProj.doors||[]).issues,c:"#ff6b4a"}].map(function(s2){return <div key={s2.l} style={{background:"#ffffff",borderRadius:10,padding:"10px 6px",textAlign:"center",border:"1px solid #e8e8e8"}}><div style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:20,color:s2.c}}>{s2.v}</div><div style={{fontSize:9,color:"#888",textTransform:"uppercase",letterSpacing:1}}>{s2.l}</div></div>;})}
           </div>
 
           {/* Assignment panel - collapsible */}
-          {selProj.doors&&selProj.doors.length>0&&(function(){
+          {isAdmin&&selProj.doors&&selProj.doors.length>0&&(function(){
             var unassigned=0;var assignMap={};
             (selProj.doors||[]).forEach(function(d2){if(!d2.assignedTo)unassigned++;else{if(!assignMap[d2.assignedTo])assignMap[d2.assignedTo]=0;assignMap[d2.assignedTo]++;}});
             return(
@@ -1125,13 +1136,17 @@ export default function App(){
             <div style={{textAlign:"center",padding:"30px 20px"}}>
               <div style={{fontSize:40,marginBottom:12}}>🚪</div>
               <div style={{fontSize:14,color:"#888",marginBottom:16}}>Henüz kapı yok</div>
-              <button onClick={function(){importRef.current&&importRef.current.click();}} style={{...B,background:"#fef5eb",color:"#e67e22",fontSize:13,padding:"10px 18px",border:"1px solid #e67e2244"}}>📥 Kapı Listesi İçe Aktar</button>
+              {isAdmin&&<button onClick={function(){importRef.current&&importRef.current.click();}} style={{...B,background:"#fef5eb",color:"#e67e22",fontSize:13,padding:"10px 18px",border:"1px solid #e67e2244"}}>📥 Kapı Listesi İçe Aktar</button>}
             </div>
           ):(function(){
             var isBulk=bulkCarp&&bulkCarp!=="__toggle";
+            var srdy=0,snot=0,sun=0;selProj.doors.forEach(function(d2){var st3=((d2.steps&&d2.steps.site_check)||{}).siteStatus||"";if(st3==="ready")srdy++;else if(st3==="not_ready")snot++;else sun++;});
             var filtered=selProj.doors.filter(function(d2){
               var ms=!search||d2.code.indexOf(search)>=0||(d2.mahal||"").toLowerCase().indexOf(search.toLowerCase())>=0||(d2.kapiTipi||"").toLowerCase().indexOf(search.toLowerCase())>=0;
-              var mf=filter==="all"||stat(d2)===filter;return ms&&mf;
+              var mf=filter==="all"||stat(d2)===filter;
+              var sst=((d2.steps&&d2.steps.site_check)||{}).siteStatus||"";
+              var msf=siteFilter==="all"||(siteFilter==="ready"&&sst==="ready")||(siteFilter==="not_ready"&&sst==="not_ready")||(siteFilter==="unchecked"&&!sst);
+              return ms&&mf&&msf;
             });
             var allF=filtered.length>0;filtered.forEach(function(d2){if(!bulkSel[d2.id])allF=false;});
             return(
@@ -1140,6 +1155,10 @@ export default function App(){
                 <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
                   {["all","not_started","in_progress","issue","completed"].map(function(f){return <button key={f} onClick={function(){setFilter(f);}} style={{...B,background:filter===f?"#4da6ff":"#1a1a1a",color:filter===f?"#0d1b2a":"#777",fontSize:10,padding:"5px 10px",border:filter===f?"none":"1px solid #ddd"}}>{f==="all"?"Tümü":STAT[f].lb}</button>;})}
                 </div>
+                <div style={{display:"flex",gap:6,marginBottom:6,flexWrap:"wrap"}}>
+                  {[["all","📍 Yer: Tümü"],["ready","🟢 Hazır ("+srdy+")"],["not_ready","🔴 Değil ("+snot+")"],["unchecked","⚪ Kontrolsüz ("+sun+")"]].map(function(f2){return <button key={f2[0]} onClick={function(){setSiteFilter(f2[0]);}} style={{...B,background:siteFilter===f2[0]?(f2[0]==="not_ready"?"#e74c3c":f2[0]==="ready"?"#27ae60":"#2a7fff"):"#fff",color:siteFilter===f2[0]?"#fff":"#777",fontSize:10,padding:"5px 10px",border:siteFilter===f2[0]?"none":"1px solid #ddd"}}>{f2[1]}</button>;})}
+                </div>
+                <div style={{fontSize:11,color:"#888",marginBottom:12}}>📍 Yer durumu: <span style={{color:"#27ae60",fontWeight:600}}>{srdy} hazır</span> · <span style={{color:"#e74c3c",fontWeight:600}}>{snot} hazır değil</span> · {sun} kontrolsüz</div>
                 {isBulk&&filtered.length>0&&(
                   <div onClick={function(){if(allF)setBulkSel({});else{var s2=Object.assign({},bulkSel);filtered.forEach(function(d2){s2[d2.id]=true;});setBulkSel(s2);}}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:"#ffffff",borderRadius:10,marginBottom:8,cursor:"pointer",border:"1px solid #ddd"}}>
                     <div style={{width:22,height:22,borderRadius:6,border:"2px solid "+(allF?"#4da6ff":"#444"),background:allF?"rgba(77,166,255,0.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center"}}>{allF&&<span style={{color:"#e67e22",fontSize:12,fontWeight:700}}>✓</span>}</div>
@@ -1152,7 +1171,7 @@ export default function App(){
                     var cp=null;carps.forEach(function(c){if(c.id===door.assignedTo)cp=c;});
                     var isOn=!!bulkSel[door.id];
                     return(
-                      <div key={door.id} onClick={function(){if(isBulk){var s3=Object.assign({},bulkSel);if(s3[door.id])delete s3[door.id];else s3[door.id]=true;setBulkSel(s3);}else{setSelDoorId(door.id);go("doorDetail");}}} style={{background:"#ffffff",borderRadius:12,padding:14,cursor:"pointer",border:"1px solid "+(isBulk&&isOn?"#4da6ff44":s2.fg+"22")}}>
+                      <div key={door.id} onClick={function(){if(isBulk){var s3=Object.assign({},bulkSel);if(s3[door.id])delete s3[door.id];else s3[door.id]=true;setBulkSel(s3);}else{listScrollRef.current=window.scrollY;setSelDoorId(door.id);go("doorDetail");}}} style={{background:"#ffffff",borderRadius:12,padding:14,cursor:"pointer",border:"1px solid "+(isBulk&&isOn?"#4da6ff44":s2.fg+"22")}}>
                         <div style={{display:"flex",alignItems:"center",gap:12}}>
                           {isBulk?(<div style={{width:28,height:28,borderRadius:7,border:"2px solid "+(isOn?"#4da6ff":"#444"),background:isOn?"rgba(77,166,255,0.15)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{isOn&&<span style={{color:"#e67e22",fontSize:14,fontWeight:700}}>✓</span>}</div>):(<Ring percent={p2} size={50}/>)}
                           <div style={{flex:1,minWidth:0}}>
@@ -1160,14 +1179,16 @@ export default function App(){
                               <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:15,color:"#1a1a2a"}}>#{door.code}</span>
                               <span style={{background:s2.bg,color:s2.fg,fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:600,textTransform:"uppercase"}}>{s2.lb}</span>
                               {door.hwSetNo&&<span style={{fontSize:8,background:"#f0f0f5",color:"#888",padding:"2px 5px",borderRadius:3}}>{door.hwSetNo}</span>}
+                              {(function(){var ss2=((door.steps&&door.steps.site_check)||{});var s3=ss2.siteStatus||"";if(s3==="ready")return <span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>;if(s3==="not_ready")return <span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL</span>;return null;})()}
                             </div>
                             <div style={{fontSize:12,color:"#888"}}>{door.kapiTipi}</div>
                             {door.mahal&&<div style={{fontSize:11,color:"#888"}}>📍 {door.mahal}</div>}
+                            {(function(){var ss2=((door.steps&&door.steps.site_check)||{});if(ss2.siteStatus==="not_ready"&&ss2.notes)return <div style={{fontSize:10,color:"#e74c3c",marginTop:1}}>⚠ {String(ss2.notes).slice(0,70)}</div>;return null;})()}
                             <div style={{display:"flex",gap:8,alignItems:"center",marginTop:2,flexWrap:"wrap"}}>
                               {door.w&&<span style={{fontSize:10,color:"#aaa"}}>📐 {door.w}×{door.h||""}{door.d?" · "+door.d:""}</span>}
                               {door.kw&&<span style={{fontSize:10,color:"#e67e22"}}>🔧 {door.kw}×{door.kh||""}</span>}
                               {door.yon&&<span style={{fontSize:10,color:"#aaa"}}>{door.yon}</span>}
-                              {cp&&<span style={{fontSize:10,color:"#e67e22"}}>👷 {cp.name}</span>}
+                              {cp&&isAdmin&&<span style={{fontSize:10,color:"#e67e22"}}>👷 {cp.name}</span>}
                             </div>
                           </div>
                           {!isBulk&&<span style={{color:"#bbb",fontSize:18}}>›</span>}
@@ -1538,8 +1559,8 @@ export default function App(){
       })()}
 
       {/* ADMIN: DOOR DETAIL */}
-      {isAdmin&&view==="doorDetail"&&selDoor&&(
-        <DetailView door={selDoor} carpenters={carps} isAdmin={true} projectName={selProj?selProj.name:""} catalog={catalog} catImages={catImages} onUpdate={function(u){updateDoor(selProjId,u);}} onBack={function(){go("projectDoors");}}/>
+      {(isAdmin||isEmp)&&view==="doorDetail"&&selDoor&&(
+        <DetailView door={selDoor} carpenters={carps} isAdmin={isAdmin} empMode={isEmp} empName={user?user.name:""} projectName={selProj?selProj.name:""} catalog={catalog} catImages={catImages} onUpdate={function(u){updateDoor(selProjId,u);}} onBack={function(){go("projectDoors");}}/>
       )}
 
       {/* ADMIN: DASHBOARD — Carpenter Performance */}
@@ -1853,6 +1874,10 @@ export default function App(){
           <h2 style={{fontSize:18,fontWeight:700,margin:"0 0 16px",color:"#1a1a2a"}}>👷 Ustalar</h2>
           {carps.map(function(c){return(<div key={c.id} style={{background:"#ffffff",borderRadius:12,padding:12,border:"1px solid #e8e8e8",display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}><div><div style={{fontSize:14,fontWeight:600,color:"#1a1a2a"}}>{c.name}</div><div style={{fontSize:11,color:"#e67e22",fontFamily:"'JetBrains Mono'"}}>{c.cid}</div></div><button onClick={function(){if(window.confirm("Kaldır: "+c.name+"?"))setCarps(function(p){var n=p.filter(function(x){return x.id!==c.id;});sSet("dtv7-carp",n);return n;});}} style={{...B,background:"#fde8e8",color:"#e74c3c",fontSize:11,padding:"6px 10px"}}>✕</button></div>);})}
           <AddCarpForm onAdd={function(c){setCarps(function(p){var n=p.concat([c]);sSet("dtv7-carp",n);return n;});}}/>
+          <h2 style={{fontSize:18,fontWeight:700,margin:"24px 0 8px",color:"#1a1a2a"}}>🏢 İşverenler</h2>
+          <div style={{fontSize:11,color:"#888",marginBottom:10}}>İşveren yer kontrolü işaretleyebilir; montaj adımlarını salt-okunur görür. Rapor, usta ve fiyat bilgilerine erişemez.</div>
+          {emps.map(function(em){return(<div key={em.id} style={{background:"#ffffff",borderRadius:12,padding:12,border:"1px solid #e8e8e8",marginBottom:8}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><div><div style={{fontSize:14,fontWeight:600,color:"#1a1a2a"}}>{em.name}</div><div style={{fontSize:11,color:"#2a7fff"}}>🏢 İşveren</div></div><button onClick={function(){if(window.confirm("Kaldır: "+em.name+"?"))setEmps(function(p){var n=p.filter(function(x){return x.id!==em.id;});sSet("dtv7-emp",n);return n;});}} style={{...B,background:"#fde8e8",color:"#e74c3c",fontSize:11,padding:"6px 10px"}}>✕</button></div><div style={{display:"flex",gap:5,flexWrap:"wrap",marginTop:8}}>{projects.map(function(pr){var on=(em.projIds||[]).indexOf(pr.id)>=0;return <span key={pr.id} onClick={function(){setEmps(function(p){var n=p.map(function(x){if(x.id!==em.id)return x;var ids=(x.projIds||[]).slice();var ix=ids.indexOf(pr.id);if(ix>=0)ids.splice(ix,1);else ids.push(pr.id);return Object.assign({},x,{projIds:ids});});sSet("dtv7-emp",n);return n;});}} style={{fontSize:10,padding:"4px 8px",borderRadius:6,cursor:"pointer",background:on?"#2a7fff":"#f0f0f5",color:on?"#fff":"#999",border:"1px solid "+(on?"#2a7fff":"#ddd")}}>{on?"✓ ":""}{pr.name}</span>;})}</div></div>);})}
+          <AddEmpForm projects={projects} onAdd={function(em){setEmps(function(p){var n=p.concat([em]);sSet("dtv7-emp",n);return n;});}}/>
         </div>
       )}
 
@@ -1903,12 +1928,12 @@ export default function App(){
       })()}
 
       {/* CARPENTER: PROJECTS */}
-      {!isAdmin&&view==="projects"&&(
+      {!isAdmin&&!isEmp&&view==="projects"&&(
         <div style={{padding:16}}>
           <div style={{fontSize:18,fontWeight:700,color:"#1a1a2a",marginBottom:16}}>📁 Projeleriniz</div>
           {carpProjects.length===0&&<div style={{textAlign:"center",color:"#888",padding:40}}>Henüz atanmış kapı yok</div>}
           {carpProjects.map(function(item){var pp=0;if(item.doors.length>0){var t=0;item.doors.forEach(function(d2){t+=pct(d2);});pp=Math.round(t/item.doors.length);}return(
-            <div key={item.proj.id} onClick={function(){setSelProjId(item.proj.id);go("projectDoors");}} style={{background:"#ffffff",borderRadius:14,padding:16,cursor:"pointer",border:"1px solid #e8e8e8",borderLeft:"4px solid #4aff7a",marginBottom:10}}>
+            <div key={item.proj.id} onClick={function(){listScrollRef.current=0;setSelProjId(item.proj.id);go("projectDoors");}} style={{background:"#ffffff",borderRadius:14,padding:16,cursor:"pointer",border:"1px solid #e8e8e8",borderLeft:"4px solid #4aff7a",marginBottom:10}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div><div style={{fontSize:16,fontWeight:700,color:"#1a1a2a"}}>{item.proj.name}</div>{item.proj.location&&<div style={{fontSize:11,color:"#999",marginTop:2}}>📍 {item.proj.location}</div>}<div style={{fontSize:11,color:"#888",marginTop:4}}>{item.doors.length} doors assigned</div></div>
                 <Ring percent={pp} size={48}/>
@@ -1919,11 +1944,11 @@ export default function App(){
       )}
 
       {/* CARPENTER: DOORS */}
-      {!isAdmin&&view==="projectDoors"&&selProj&&(
+      {!isAdmin&&!isEmp&&view==="projectDoors"&&selProj&&(
         <div style={{padding:16}}>
           <div style={{fontSize:18,fontWeight:700,color:"#1a1a2a",marginBottom:16}}>Kapılarınız</div>
           {carpCurDoors.map(function(door){var st2=stat(door);var s2=STAT[st2];var p2=pct(door);return(
-            <div key={door.id} onClick={function(){setSelDoorId(door.id);go("doorDetail");}} style={{background:"#ffffff",borderRadius:12,padding:14,cursor:"pointer",border:"1px solid "+s2.fg+"22",marginBottom:8}}>
+            <div key={door.id} onClick={function(){listScrollRef.current=window.scrollY;setSelDoorId(door.id);go("doorDetail");}} style={{background:"#ffffff",borderRadius:12,padding:14,cursor:"pointer",border:"1px solid "+s2.fg+"22",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
                 <Ring percent={p2} size={50}/>
                 <div style={{flex:1,minWidth:0}}>
@@ -1942,7 +1967,7 @@ export default function App(){
       )}
 
       {/* CARPENTER: DOOR DETAIL */}
-      {!isAdmin&&view==="doorDetail"&&selDoor&&(
+      {!isAdmin&&!isEmp&&view==="doorDetail"&&selDoor&&(
         <DetailView door={selDoor} carpenters={carps} isAdmin={false} projectName={selProj?selProj.name:""} catalog={catalog} catImages={catImages} onUpdate={function(u){updateDoor(selProjId,u);}} onBack={function(){go("projectDoors");}}/>
       )}
     </div>
