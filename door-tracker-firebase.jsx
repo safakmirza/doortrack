@@ -1277,6 +1277,7 @@ export default function App(){
             stepShort.forEach(function(s2){
               var hasIt=doorHasStep(d2,s2.id);
               if(!hasIt){row.push("—");row.push("");}
+              else if(s2.id==="site_check"){var sst4=siteSt(d2);if(sst4==="ready"){row.push("Hazır");var dt4=stepDate(d2,s2.id);row.push(dt4?fmtFull(dt4):"");}else if(sst4==="not_ready"){row.push("HAZIR DEĞİL");row.push("");}else{row.push("—");row.push("");}}
               else if(stepIssue(d2,s2.id)){row.push("⚠ Issue");row.push("");}
               else if(stepDone(d2,s2.id)){row.push("✓");var dt=stepDate(d2,s2.id);row.push(dt?fmtFull(dt):"");}
               else{row.push("—");row.push("");}
@@ -1340,9 +1341,9 @@ export default function App(){
               stepData.forEach(function(sd2){
                 var s=sd2.data;
                 html+="<div class='stepbox'><div class='stepname'>"+sd2.label;
-                if(s.siteStatus==="ready")html+=" <span class='status-ready'>✅ Hazır</span>";
-                if(s.siteStatus==="not_ready")html+=" <span class='status-notready'>❌ Hazır Değil</span>";
-                if(s.done&&!s.siteStatus)html+=" <span class='status-ready'>✓</span>";
+                var sEff=s.siteStatus==="not_ready"?"not_ready":((s.siteStatus==="ready"||s.done)?"ready":"");
+                if(sd2.label==="Yer Kontrolü"){if(sEff==="ready")html+=" <span class='status-ready'>✅ Hazır</span>";if(sEff==="not_ready")html+=" <span class='status-notready'>❌ Hazır Değil</span>";}
+                else if(s.done)html+=" <span class='status-ready'>✓</span>";
                 html+="</div>";
                 if(s.completedAt)html+="<div class='stepdate'>🕐 "+new Date(s.completedAt).toLocaleDateString("tr-TR")+" "+new Date(s.completedAt).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
                 if(s.notes)html+="<div class='stepnote'>📝 "+s.notes+"</div>";
@@ -1948,23 +1949,51 @@ export default function App(){
       {/* CARPENTER: DOORS */}
       {!isAdmin&&!isEmp&&view==="projectDoors"&&selProj&&(
         <div style={{padding:16}}>
-          <div style={{fontSize:18,fontWeight:700,color:"#1a1a2a",marginBottom:16}}>Kapılarınız</div>
-          {carpCurDoors.map(function(door){var st2=stat(door);var s2=STAT[st2];var p2=pct(door);return(
+          <div style={{fontSize:18,fontWeight:700,color:"#1a1a2a",marginBottom:12}}>Kapılarınız</div>
+          {(function(){
+            var srdy=0,snot=0,sun=0;carpCurDoors.forEach(function(d2){var st3=siteSt(d2);if(st3==="ready")srdy++;else if(st3==="not_ready")snot++;else sun++;});
+            var cf=carpCurDoors.filter(function(d2){
+              var ms=!search||d2.code.indexOf(search)>=0||(d2.mahal||"").toLowerCase().indexOf(search.toLowerCase())>=0||(d2.kapiTipi||"").toLowerCase().indexOf(search.toLowerCase())>=0;
+              var mf=filter==="all"||stat(d2)===filter;
+              var sst=siteSt(d2);
+              var msf=siteFilter==="all"||(siteFilter==="ready"&&sst==="ready")||(siteFilter==="not_ready"&&sst==="not_ready")||(siteFilter==="unchecked"&&!sst);
+              return ms&&mf&&msf;
+            });
+            return(<div>
+            <input value={search} onChange={function(e){setSearch(e.target.value);}} placeholder="Ara: #, mahal, tip…" style={{...INP,marginBottom:10}}/>
+            <div style={{display:"flex",gap:6,marginBottom:6,flexWrap:"wrap"}}>
+              {["all","not_started","in_progress","issue","completed"].map(function(f){return <button key={f} onClick={function(){setFilter(f);}} style={{...B,background:filter===f?"#4da6ff":"#1a1a1a",color:filter===f?"#0d1b2a":"#777",fontSize:10,padding:"5px 10px",border:filter===f?"none":"1px solid #ddd"}}>{f==="all"?"Tümü":STAT[f].lb}</button>;})}
+            </div>
+            <div style={{display:"flex",gap:6,marginBottom:6,flexWrap:"wrap"}}>
+              {[["all","📍 Yer: Tümü"],["ready","🟢 Hazır ("+srdy+")"],["not_ready","🔴 Değil ("+snot+")"],["unchecked","⚪ Kontrolsüz ("+sun+")"]].map(function(f2){return <button key={f2[0]} onClick={function(){setSiteFilter(f2[0]);}} style={{...B,background:siteFilter===f2[0]?(f2[0]==="not_ready"?"#e74c3c":f2[0]==="ready"?"#27ae60":"#2a7fff"):"#fff",color:siteFilter===f2[0]?"#fff":"#777",fontSize:10,padding:"5px 10px",border:siteFilter===f2[0]?"none":"1px solid #ddd"}}>{f2[1]}</button>;})}
+            </div>
+            <div style={{fontSize:11,color:"#888",marginBottom:12}}>📍 Yer durumu: <span style={{color:"#27ae60",fontWeight:600}}>{srdy} hazır</span> · <span style={{color:"#e74c3c",fontWeight:600}}>{snot} hazır değil</span> · {sun} kontrolsüz</div>
+            {cf.map(function(door){var st2=stat(door);var s2=STAT[st2];var p2=pct(door);var sss=siteSt(door);var ssn=((door.steps&&door.steps.site_check)||{}).notes;return(
             <div key={door.id} onClick={function(){listScrollRef.current=window.scrollY;setSelDoorId(door.id);go("doorDetail");}} style={{background:"#ffffff",borderRadius:12,padding:14,cursor:"pointer",border:"1px solid "+s2.fg+"22",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
                 <Ring percent={p2} size={50}/>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
                     <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:15,color:"#1a1a2a"}}>#{door.code}</span>
                     <span style={{background:s2.bg,color:s2.fg,fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:600,textTransform:"uppercase"}}>{s2.lb}</span>
+                    {sss==="not_ready"&&<span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL</span>}
+                    {sss==="ready"&&p2===0&&<span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>}
                   </div>
                   <div style={{fontSize:12,color:"#888"}}>{door.kapiTipi}</div>
                   {door.mahal&&<div style={{fontSize:11,color:"#888"}}>📍 {door.mahal}</div>}
+                  {sss==="not_ready"&&ssn&&<div style={{fontSize:10,color:"#e74c3c",marginTop:1}}>⚠ {String(ssn).slice(0,70)}</div>}
+                  <div style={{display:"flex",gap:8,alignItems:"center",marginTop:2,flexWrap:"wrap"}}>
+                    {door.w&&<span style={{fontSize:10,color:"#aaa"}}>📐 {door.w}×{door.h||""}{door.d?" · "+door.d:""}</span>}
+                    {door.kw&&<span style={{fontSize:10,color:"#e67e22"}}>🔧 {door.kw}×{door.kh||""}</span>}
+                    {door.yon&&<span style={{fontSize:10,color:"#aaa"}}>{door.yon}</span>}
+                  </div>
                 </div>
                 <span style={{color:"#bbb",fontSize:18}}>›</span>
               </div>
             </div>
-          );})}
+            );})}
+            </div>);
+          })()}
         </div>
       )}
 
