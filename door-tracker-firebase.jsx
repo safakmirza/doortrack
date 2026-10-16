@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as XLSX from "xlsx";
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentSingleTabManager, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadString, getDownloadURL } from "firebase/storage";
 
 var firebaseConfig = {
@@ -13,7 +13,7 @@ var firebaseConfig = {
   appId: "1:433276578809:web:eafbbf2179bcc0d610ab28"
 };
 var fbApp = initializeApp(firebaseConfig);
-var db = getFirestore(fbApp);
+var db;try{db=initializeFirestore(fbApp,{localCache:persistentLocalCache({tabManager:persistentSingleTabManager()})});}catch(e){console.warn("Offline cache yok:",e);db=getFirestore(fbApp);}
 var storage = getStorage(fbApp);
 
 // All possible steps
@@ -89,6 +89,42 @@ function pct(door){
 }
 
 function siteSt(door){var ss=(door.steps&&door.steps.site_check)||{};if(ss.siteStatus==="not_ready")return"not_ready";if(ss.siteStatus==="ready"||ss.done)return"ready";return"";}
+
+var SITE_REASONS=[
+  {id:"duvar",label:"🧱 Duvar yok"},
+  {id:"siva",label:"🩹 Sıva yok"},
+  {id:"kot",label:"📐 Döşeme kotu bitmemiş"},
+  {id:"engel",label:"🚧 Önü kapalı / malzeme var"},
+  {id:"olcu",label:"📏 Ölçü uyumsuz"}
+];
+function reasonLabel(id){for(var i=0;i<SITE_REASONS.length;i++){if(SITE_REASONS[i].id===id)return SITE_REASONS[i].label;}return id;}
+function siteReasons(door){var ss=(door.steps&&door.steps.site_check)||{};return ss.reasons||[];}
+function reasonsText(door){var r=siteReasons(door);if(r.length===0)return"";return r.map(reasonLabel).join(", ");}
+function guessReasons(note){
+  var n=(note||"").toLowerCase();var r=[];
+  if(n.indexOf("duvar")>=0)r.push("duvar");
+  if(n.indexOf("sıva")>=0||n.indexOf("siva")>=0)r.push("siva");
+  if(n.indexOf("kot")>=0||n.indexOf("şap")>=0||n.indexOf("sap ")>=0||n.indexOf("döşeme")>=0||n.indexOf("doseme")>=0)r.push("kot");
+  if(n.indexOf("malzeme")>=0||n.indexOf("iskele")>=0||n.indexOf("kapalı")>=0||n.indexOf("kapali")>=0||n.indexOf("engel")>=0||n.indexOf("boru")>=0)r.push("engel");
+  if(n.indexOf("ölçü")>=0||n.indexOf("olcu")>=0||n.indexOf("uyumsuz")>=0)r.push("olcu");
+  if(r.length===0)r.push("duvar");
+  return r;
+}
+function migrateSiteReasons(projList){
+  var changedIds=[];
+  projList.forEach(function(proj){
+    var changed=false;
+    (proj.doors||[]).forEach(function(d2){
+      var ss=d2.steps&&d2.steps.site_check;
+      if(ss&&ss.siteStatus==="not_ready"&&(!ss.reasons||ss.reasons.length===0)){
+        ss.reasons=guessReasons(ss.notes);
+        changed=true;
+      }
+    });
+    if(changed)changedIds.push(proj.id);
+  });
+  return changedIds;
+}
 
 function stat(door){var p=pct(door);var hi=false;if(door.steps){Object.keys(door.steps).forEach(function(k){if(door.steps[k].issue)hi=true;});}if(hi)return"issue";if(p===100)return"completed";if(p>0)return"in_progress";return"not_started";}
 
@@ -749,12 +785,32 @@ var LBL={fontSize:10,color:"#888",textTransform:"uppercase",letterSpacing:1,marg
 
 function Ring(props){var prc=props.percent;var sz=props.size||48;var r=(sz-5)/2;var c=2*Math.PI*r;var off=c-(prc/100)*c;var col=prc===100?"#4aff7a":prc>0?"#4da6ff":"#444";return(<svg width={sz} height={sz} style={{transform:"rotate(-90deg)",flexShrink:0}}><circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke="#222" strokeWidth={4}/><circle cx={sz/2} cy={sz/2} r={r} fill="none" stroke={col} strokeWidth={4} strokeDasharray={c} strokeDashoffset={off} strokeLinecap="round" style={{transition:"stroke-dashoffset 0.4s"}}/><text x={sz/2} y={sz/2} textAnchor="middle" dominantBaseline="central" fill={col} fontSize={sz*0.26} fontWeight={700} style={{transform:"rotate(90deg)",transformOrigin:"center"}}>{prc}%</text></svg>);}
 
-function Photos(props){var photos=props.photos||[];var onAdd=props.onAdd;var onRemove=props.onRemove;var inputRef=useRef(null);var upS=useState(false);var uploading=upS[0],setUploading=upS[1];function handleFile(e){var f=e.target.files&&e.target.files[0];if(!f)return;setUploading(true);var reader=new FileReader();reader.onload=function(ev){var img=new window.Image();img.onload=function(){var maxW=2000;var maxH=2000;var w=img.width;var h=img.height;if(w>maxW){h=h*(maxW/w);w=maxW;}if(h>maxH){w=w*(maxH/h);h=maxH;}var canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,w,h);var dataUrl=canvas.toDataURL("image/jpeg",0.80);var photoId=uid();var path="photos/"+photoId+".jpg";var sRef2=storageRef(storage,path);uploadString(sRef2,dataUrl,"data_url").then(function(snap){return getDownloadURL(snap.ref);}).then(function(url){onAdd({id:photoId,data:url,name:f.name,at:Date.now()});setUploading(false);}).catch(function(err){console.error("Upload error:",err);alert("Foto yuklenemedi: "+err.message);setUploading(false);});};img.onerror=function(){alert("Foto okunamadi");setUploading(false);};img.src=ev.target.result;};reader.readAsDataURL(f);e.target.value="";}return(<div><input ref={inputRef} type="file" accept="image/*" capture="environment" onChange={handleFile} style={{display:"none"}}/><div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>{photos.map(function(p){return(<div key={p.id} style={{position:"relative",width:56,height:56,borderRadius:6,overflow:"hidden",border:"1px solid #ddd"}}><img src={p.data} style={{width:"100%",height:"100%",objectFit:"cover"}}/><div onClick={function(e){e.stopPropagation();onRemove(p.id);}} style={{position:"absolute",top:1,right:1,background:"#000a",color:"#e74c3c",width:16,height:16,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,cursor:"pointer"}}>✕</div></div>);})}{uploading?<span style={{fontSize:11,color:"#e67e22"}}>📤 Yükleniyor...</span>:<button onClick={function(){inputRef.current&&inputRef.current.click();}} style={{...B,background:"#fef5eb",color:"#e67e22",fontSize:11,padding:"6px 10px"}}>📸</button>}</div></div>);}
+function compressImage(file,cb,onErr){var reader=new FileReader();reader.onload=function(ev){var img=new window.Image();img.onload=function(){var maxW=2000;var maxH=2000;var w=img.width;var h=img.height;if(w>maxW){h=h*(maxW/w);w=maxW;}if(h>maxH){w=w*(maxH/h);h=maxH;}var canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;var ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,w,h);cb(canvas.toDataURL("image/jpeg",0.80));};img.onerror=function(){onErr("Foto okunamadı");};img.src=ev.target.result;};reader.readAsDataURL(file);}
 
-function StepRow(props){var step=props.step;var data=props.data||{};var readOnly=props.readOnly;var onToggle=props.onToggle;var onNote=props.onNote;var onIssue=props.onIssue;var onPhoto=props.onPhoto;var onRmPhoto=props.onRmPhoto;var origDone=props.origDone;var onSiteStatus=props.onSiteStatus;var expS=useState(false);var exp=expS[0],setExp=expS[1];var done=!!data.done;var hasIssue=!!data.issue;var isLocked=done&&origDone;var isSite=step.id==="site_check";var siteStatus=data.siteStatus||"";var effReady=isSite&&siteStatus!=="not_ready"&&(siteStatus==="ready"||done);return(<div style={{background:"#ffffff",borderRadius:10,border:"1px solid "+(done?"#27ae6044":hasIssue?"#e74c3c44":siteStatus==="not_ready"?"#e74c3c44":"#222"),overflow:"hidden",marginBottom:6}}><div style={{display:"flex",alignItems:"center",padding:"10px 12px",gap:10,cursor:"pointer"}} onClick={function(){setExp(!exp);}}><div onClick={function(e){e.stopPropagation();if(!isSite&&!readOnly)onToggle(step.id);}} style={{width:26,height:26,borderRadius:6,border:"2px solid "+(done?"#4aff7a":hasIssue||siteStatus==="not_ready"?"#ff6b4a":"#444"),background:done?"rgba(74,255,122,0.15)":siteStatus==="not_ready"?"rgba(255,107,74,0.1)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>{(done||effReady)&&<span style={{color:"#27ae60",fontSize:14,fontWeight:700}}>{isLocked?"🔒":"✓"}</span>}{isSite&&siteStatus==="not_ready"&&!done&&<span style={{color:"#e74c3c",fontSize:14,fontWeight:700}}>✕</span>}</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:done?"#4aff7a":siteStatus==="not_ready"?"#ff6b4a":hasIssue?"#ff6b4a":"#ccc"}}>{step.label}{effReady?" — ✅ Hazır":""}{isSite&&siteStatus==="not_ready"?" — ❌ Hazır Değil":""}</div>{data.completedAt&&<div style={{fontSize:9,color:"#aaa",marginTop:1}}>{fmtD(data.completedAt)}</div>}</div><span style={{color:"#bbb",fontSize:12}}>{exp?"▲":"▼"}</span></div>{exp&&(<div style={{padding:"0 12px 12px",borderTop:"1px solid #e8e8e8"}}>{isSite&&(<div style={{display:"flex",gap:8,marginTop:8,marginBottom:8}}><button onClick={function(){onSiteStatus(step.id,"ready");}} style={{...B,flex:1,background:effReady?"#27ae60":"#f0faf3",color:effReady?"#fff":"#27ae60",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #27ae60"}}>✅ Hazır</button><button onClick={function(){onSiteStatus(step.id,"not_ready");}} style={{...B,flex:1,background:siteStatus==="not_ready"?"#e74c3c":"#fde8e8",color:siteStatus==="not_ready"?"#fff":"#e74c3c",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #e74c3c"}}>❌ Hazır Değil</button></div>)}{!readOnly&&<div style={{marginTop:8}}><Photos photos={data.photos||[]} onAdd={function(p){onPhoto(step.id,p);}} onRemove={function(pid){onRmPhoto(step.id,pid);}}/></div>}{readOnly&&data.photos&&data.photos.length>0&&(<div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>{data.photos.map(function(p){return <img key={p.id} src={p.data} style={{width:56,height:56,objectFit:"cover",borderRadius:6,border:"1px solid #ddd"}}/>;})}</div>)}{!readOnly&&<div style={{marginTop:8}}><textarea value={data.notes||""} onChange={function(e){onNote(step.id,e.target.value);}} placeholder={isSite?"Yer durumu notu... (sıva, ölçü, engel vs.)":"Not ekleyin..."} rows={2} style={{...INP,fontSize:12,resize:"vertical"}}/></div>}{readOnly&&data.notes&&<div style={{marginTop:8,fontSize:12,color:"#888",background:"#f7f7f7",borderRadius:8,padding:"8px 10px"}}>📝 {data.notes}</div>}{!isSite&&!readOnly&&<button onClick={function(){onIssue(step.id,!hasIssue);}} style={{...B,marginTop:6,background:hasIssue?"#fde8e8":"#1a1a2a",color:hasIssue?"#ff6b4a":"#888",fontSize:11,padding:"6px 10px",border:"1px solid "+(hasIssue?"#e74c3c44":"#333")}}>{hasIssue?"⚠️ Sorun İşaretli — Kaldır":"⚠️ Sorun Bildir"}</button>}</div>)}</div>);}
+// ===== Offline photo queue (IndexedDB) =====
+function pqOpen(cb){try{var rq=indexedDB.open("dt-photoq",1);rq.onupgradeneeded=function(e){e.target.result.createObjectStore("q",{keyPath:"id"});};rq.onsuccess=function(e){cb(e.target.result);};rq.onerror=function(){cb(null);};}catch(e){cb(null);}}
+function pqAdd(item){pqOpen(function(db){if(!db)return;try{db.transaction("q","readwrite").objectStore("q").put(item);}catch(e){}});}
+function pqRemove(id){pqOpen(function(db){if(!db)return;try{db.transaction("q","readwrite").objectStore("q").delete(id);}catch(e){}});}
+function pqAll(cb){pqOpen(function(db){if(!db){cb([]);return;}try{var rq=db.transaction("q","readonly").objectStore("q").getAll();rq.onsuccess=function(e){cb(e.target.result||[]);};rq.onerror=function(){cb([]);};}catch(e){cb([]);}});}
+function uploadPhotoData(photoId,dataUrl){var path="photos/"+photoId+".jpg";var sRef2=storageRef(storage,path);return uploadString(sRef2,dataUrl,"data_url").then(function(snap){return getDownloadURL(snap.ref);});}
+
+function Photos(props){var photos=props.photos||[];var onAdd=props.onAdd;var onRemove=props.onRemove;var onReplace=props.onReplace;var onView=props.onView;var camRef=useRef(null);var galRef=useRef(null);var upS=useState(false);var uploading=upS[0],setUploading=upS[1];
+  function handleFile(e){var f=e.target.files&&e.target.files[0];if(!f)return;setUploading(true);
+    compressImage(f,function(dataUrl){
+      var photoId=uid();
+      function addPending(){pqAdd({id:photoId,data:dataUrl,at:Date.now()});onAdd({id:photoId,data:dataUrl,name:f.name,at:Date.now(),pending:true});setUploading(false);}
+      if(!navigator.onLine){addPending();return;}
+      uploadPhotoData(photoId,dataUrl).then(function(url){onAdd({id:photoId,data:url,name:f.name,at:Date.now()});setUploading(false);}).catch(function(err){console.error("Upload error:",err);addPending();});
+    },function(msg){alert(msg);setUploading(false);});
+    e.target.value="";}
+  return(<div><input ref={camRef} type="file" accept="image/*" capture="environment" onChange={handleFile} style={{display:"none"}}/><input ref={galRef} type="file" accept="image/*" onChange={handleFile} style={{display:"none"}}/><div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>{photos.map(function(p){return(<div key={p.id} style={{position:"relative",width:56,height:56,borderRadius:6,overflow:"hidden",border:"1px solid "+(p.pending?"#e67e22":"#ddd")}}><img src={p.data} onClick={function(e){e.stopPropagation();if(onView)onView(p);}} style={{width:"100%",height:"100%",objectFit:"cover",cursor:"pointer"}}/>{p.pending&&<div style={{position:"absolute",bottom:0,left:0,right:0,background:"#e67e22dd",color:"#fff",fontSize:7,textAlign:"center",padding:"1px 0"}}>⏳ BEKLİYOR</div>}<div onClick={function(e){e.stopPropagation();onRemove(p.id);}} style={{position:"absolute",top:1,right:1,background:"#000a",color:"#e74c3c",width:16,height:16,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,cursor:"pointer"}}>✕</div></div>);})}{uploading?<span style={{fontSize:11,color:"#e67e22"}}>📤 Yükleniyor...</span>:<span style={{display:"flex",gap:4}}><button onClick={function(){camRef.current&&camRef.current.click();}} style={{...B,background:"#fef5eb",color:"#e67e22",fontSize:11,padding:"6px 10px"}}>📸 Kamera</button><button onClick={function(){galRef.current&&galRef.current.click();}} style={{...B,background:"#eaf1ff",color:"#2a7fff",fontSize:11,padding:"6px 10px"}}>🖼 Galeri</button></span>}</div></div>);}
+
+function PhotoViewer(props){var p=props.photo;var onClose=props.onClose;if(!p)return null;return(<div onClick={onClose} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"#000d",zIndex:9999,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:16}}><img src={p.data} onClick={function(e){e.stopPropagation();}} style={{maxWidth:"100%",maxHeight:"82%",borderRadius:10,objectFit:"contain"}}/><div style={{color:"#fff",fontSize:12,marginTop:10,textAlign:"center"}}>{p.at?new Date(p.at).toLocaleDateString("tr-TR")+" "+new Date(p.at).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):""}{p.pending?" · ⏳ Yükleme bekliyor":""}</div><button onClick={onClose} style={{...B,marginTop:12,background:"#ffffff22",color:"#fff",padding:"10px 28px",fontSize:14,borderRadius:10,border:"1px solid #ffffff44"}}>✕ Kapat</button></div>);}
+
+function StepRow(props){var step=props.step;var data=props.data||{};var readOnly=props.readOnly;var onView=props.onView;var onToggle=props.onToggle;var onNote=props.onNote;var onIssue=props.onIssue;var onPhoto=props.onPhoto;var onRmPhoto=props.onRmPhoto;var origDone=props.origDone;var onSiteStatus=props.onSiteStatus;var onReasons=props.onReasons;var expS=useState(false);var exp=expS[0],setExp=expS[1];var done=!!data.done;var hasIssue=!!data.issue;var isLocked=done&&origDone;var isSite=step.id==="site_check";var siteStatus=data.siteStatus||"";var effReady=isSite&&siteStatus!=="not_ready"&&(siteStatus==="ready"||done);return(<div style={{background:"#ffffff",borderRadius:10,border:"1px solid "+(done?"#27ae6044":hasIssue?"#e74c3c44":siteStatus==="not_ready"?"#e74c3c44":"#222"),overflow:"hidden",marginBottom:6}}><div style={{display:"flex",alignItems:"center",padding:"10px 12px",gap:10,cursor:"pointer"}} onClick={function(){setExp(!exp);}}><div onClick={function(e){e.stopPropagation();if(!isSite&&!readOnly)onToggle(step.id);}} style={{width:26,height:26,borderRadius:6,border:"2px solid "+(done?"#4aff7a":hasIssue||siteStatus==="not_ready"?"#ff6b4a":"#444"),background:done?"rgba(74,255,122,0.15)":siteStatus==="not_ready"?"rgba(255,107,74,0.1)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>{(done||effReady)&&<span style={{color:"#27ae60",fontSize:14,fontWeight:700}}>{isLocked?"🔒":"✓"}</span>}{isSite&&siteStatus==="not_ready"&&!done&&<span style={{color:"#e74c3c",fontSize:14,fontWeight:700}}>✕</span>}</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:done?"#4aff7a":siteStatus==="not_ready"?"#ff6b4a":hasIssue?"#ff6b4a":"#ccc"}}>{step.label}{effReady?" — ✅ Hazır":""}{isSite&&siteStatus==="not_ready"?" — ❌ Hazır Değil":""}</div>{data.completedAt&&<div style={{fontSize:9,color:"#aaa",marginTop:1}}>{fmtD(data.completedAt)}</div>}</div><span style={{color:"#bbb",fontSize:12}}>{exp?"▲":"▼"}</span></div>{exp&&(<div style={{padding:"0 12px 12px",borderTop:"1px solid #e8e8e8"}}>{isSite&&(<div style={{display:"flex",gap:8,marginTop:8,marginBottom:8}}><button onClick={function(){onSiteStatus(step.id,"ready");}} style={{...B,flex:1,background:effReady?"#27ae60":"#f0faf3",color:effReady?"#fff":"#27ae60",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #27ae60"}}>✅ Hazır</button><button onClick={function(){onSiteStatus(step.id,"not_ready");}} style={{...B,flex:1,background:siteStatus==="not_ready"?"#e74c3c":"#fde8e8",color:siteStatus==="not_ready"?"#fff":"#e74c3c",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #e74c3c"}}>❌ Hazır Değil</button></div>)}{isSite&&siteStatus==="not_ready"&&(<div style={{marginBottom:8}}><div style={{fontSize:10,color:"#888",marginBottom:6}}>Sebep seçin (birden fazla olabilir):</div><div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{SITE_REASONS.map(function(r2){var sel=(data.reasons||[]).indexOf(r2.id)>=0;return <span key={r2.id} onClick={function(){if(readOnly&&!isSite)return;var cur=(data.reasons||[]).slice();var ix=cur.indexOf(r2.id);if(ix>=0)cur.splice(ix,1);else cur.push(r2.id);if(onReasons)onReasons(step.id,cur);}} style={{fontSize:11,padding:"7px 10px",borderRadius:8,cursor:"pointer",background:sel?"#e74c3c":"#fff",color:sel?"#fff":"#888",border:"1.5px solid "+(sel?"#e74c3c":"#ddd"),fontWeight:sel?600:400}}>{sel?"✓ ":""}{r2.label}</span>;})}</div>{(!data.reasons||data.reasons.length===0)&&<div style={{fontSize:10,color:"#e67e22",marginTop:5}}>⚠️ Sebep seçilmedi</div>}</div>)}{!readOnly&&<div style={{marginTop:8}}><Photos photos={data.photos||[]} onAdd={function(p){onPhoto(step.id,p);}} onRemove={function(pid){onRmPhoto(step.id,pid);}} onView={onView}/></div>}{readOnly&&data.photos&&data.photos.length>0&&(<div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>{data.photos.map(function(p){return <img key={p.id} src={p.data} onClick={function(e){e.stopPropagation();if(onView)onView(p);}} style={{width:56,height:56,objectFit:"cover",borderRadius:6,border:"1px solid #ddd",cursor:"pointer"}}/>;})}</div>)}{!readOnly&&<div style={{marginTop:8}}><textarea value={data.notes||""} onChange={function(e){onNote(step.id,e.target.value);}} placeholder={isSite?"Yer durumu notu... (sıva, ölçü, engel vs.)":"Not ekleyin..."} rows={2} style={{...INP,fontSize:12,resize:"vertical"}}/></div>}{readOnly&&data.notes&&<div style={{marginTop:8,fontSize:12,color:"#888",background:"#f7f7f7",borderRadius:8,padding:"8px 10px"}}>📝 {data.notes}</div>}{!isSite&&!readOnly&&<button onClick={function(){onIssue(step.id,!hasIssue);}} style={{...B,marginTop:6,background:hasIssue?"#fde8e8":"#1a1a2a",color:hasIssue?"#ff6b4a":"#888",fontSize:11,padding:"6px 10px",border:"1px solid "+(hasIssue?"#e74c3c44":"#333")}}>{hasIssue?"⚠️ Sorun İşaretli — Kaldır":"⚠️ Sorun Bildir"}</button>}</div>)}</div>);}
 
 function DetailView(props){
-  var door=props.door;var carps=props.carpenters;var isAdmin=props.isAdmin;var empMode=props.empMode;var empName=props.empName;
+  var door=props.door;var carps=props.carpenters;var isAdmin=props.isAdmin;var empMode=props.empMode;var empName=props.empName;var pvS=useState(null);var viewPhoto=pvS[0],setViewPhoto=pvS[1];
   var projName=props.projectName;var onUpdate=props.onUpdate;var onBack=props.onBack;
   var catalog=props.catalog||[];
   var catImages=props.catImages||{};
@@ -779,6 +835,7 @@ function DetailView(props){
 
   return(
     <div style={{padding:16,paddingBottom:100}}>
+      <PhotoViewer photo={viewPhoto} onClose={function(){setViewPhoto(null);}}/>
       {onBack&&(<button onClick={onBack} style={{...B,background:"transparent",color:"#e67e22",fontSize:13,padding:"6px 0",marginBottom:10,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:18,fontWeight:700}}>←</span> Kapılara Dön</button>)}
       <div style={{background:"linear-gradient(135deg,"+s.bg+",#fef5eb)",borderRadius:14,padding:16,marginBottom:16,border:"1px solid "+s.fg+"33"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
@@ -827,7 +884,7 @@ function DetailView(props){
       {!isAdmin&&edit.notes&&<div style={{background:"#f0f4ff",borderRadius:8,padding:"8px 12px",marginBottom:14,fontSize:12,color:"#888",border:"1px solid #e8e8e8"}}>📝 {edit.notes}</div>}
 
       <div style={{...LBL,marginBottom:8}}>Montaj Adımları</div>
-      {(function(){var doorSteps=getStepsForDoor(edit);return Object.keys(GROUPS).map(function(gk){var gs=doorSteps.filter(function(s2){return s2.group===gk;});if(gs.length===0)return null;return(<div key={gk} style={{marginBottom:12}}><div style={{fontSize:11,fontWeight:600,color:"#aaa",marginBottom:4}}>{GROUPS[gk]}</div>{gs.map(function(step){var od=door.steps&&door.steps[step.id]&&door.steps[step.id].done;return <StepRow key={step.id} step={step} readOnly={empMode&&step.id!=="site_check"} data={(edit.steps&&edit.steps[step.id])||{}} onToggle={handleToggle} origDone={od} onNote={function(sid,v){updStep(sid,{notes:v});}} onIssue={function(sid,v){updStep(sid,{issue:v});}} onPhoto={addPhoto} onRmPhoto={rmPhoto} isAdmin={isAdmin} onSiteStatus={function(sid,status){if(status==="ready"){updStep(sid,{siteStatus:status,done:true});}else{updStep(sid,{siteStatus:status,done:false});}}}/>;})}</div>);});})()}
+      {(function(){var doorSteps=getStepsForDoor(edit);return Object.keys(GROUPS).map(function(gk){var gs=doorSteps.filter(function(s2){return s2.group===gk;});if(gs.length===0)return null;return(<div key={gk} style={{marginBottom:12}}><div style={{fontSize:11,fontWeight:600,color:"#aaa",marginBottom:4}}>{GROUPS[gk]}</div>{gs.map(function(step){var od=door.steps&&door.steps[step.id]&&door.steps[step.id].done;return <StepRow key={step.id} step={step} onView={function(p){setViewPhoto(p);}} onReasons={function(sid,rs){updStep(sid,{reasons:rs});}} readOnly={empMode&&step.id!=="site_check"} data={(edit.steps&&edit.steps[step.id])||{}} onToggle={handleToggle} origDone={od} onNote={function(sid,v){updStep(sid,{notes:v});}} onIssue={function(sid,v){updStep(sid,{issue:v});}} onPhoto={addPhoto} onRmPhoto={rmPhoto} isAdmin={isAdmin} onSiteStatus={function(sid,status){if(status==="ready"){updStep(sid,{siteStatus:status,done:true});}else{updStep(sid,{siteStatus:status,done:false});}}}/>;})}</div>);});})()}
       {edit.changeLog&&edit.changeLog.length>0&&(<div style={{marginBottom:14}}><div style={{...LBL,marginBottom:6}}>Değişiklik Geçmişi</div><div style={{background:"#ffffff",borderRadius:10,border:"1px solid #e8e8e8",overflow:"hidden"}}>{edit.changeLog.slice(-10).reverse().map(function(lg,idx){var ic=lg.action==="completed"?"✅":"🔄";return(<div key={idx} style={{padding:"8px 12px",borderBottom:"1px solid #e8e8e8",fontSize:11}}><div><span style={{color:lg.action==="completed"?"#4aff7a":"#ff6b4a",fontWeight:600}}>{ic} {lg.step}</span><span style={{color:"#888"}}> — {lg.action==="completed"?"Tamamlandı":lg.reason}</span></div><div style={{color:"#aaa",fontSize:10,marginTop:2}}>{lg.by} — {fmtD(lg.at)}</div></div>);})}</div></div>)}
 
       <div style={{position:"fixed",bottom:0,left:0,right:0,padding:"12px 16px",background:"linear-gradient(transparent,#f4f4f4 30%)",zIndex:50,maxWidth:500,margin:"0 auto"}}>
@@ -900,6 +957,7 @@ export default function App(){
   var listScrollRef=useRef(0);
   var empsS=useState([]);var emps=empsS[0],setEmps=empsS[1];
   var sfS=useState("all");var siteFilter=sfS[0],setSiteFilter=sfS[1];
+  var ddS=useState(new Date().toISOString().slice(0,10));var dailyDate=ddS[0],setDailyDate=ddS[1];
 
   useEffect(function(){
     Promise.all([loadProjects(),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices"),sGet("dtv7-emp")]).then(function(res){
@@ -907,7 +965,9 @@ export default function App(){
       var loadedProj=res[0]&&res[0].length>0?res[0]:[SIGMA_PROJECT];
       var defaults=[SIGMA_PROJECT];
       defaults.forEach(function(dp){var found=false;loadedProj.forEach(function(p){if(p.id===dp.id)found=true;});if(!found)loadedProj.push(dp);});
+      var migrated=migrateSiteReasons(loadedProj);
       setProjects(loadedProj);
+      if(migrated.length>0){loadedProj.forEach(function(p){if(migrated.indexOf(p.id)>=0)saveProject(p);});}
       setCarps(res[1]&&res[1].length>0?res[1]:DEFAULT_CARPS);
       setCatalog(res[2]&&res[2].length>0?res[2]:DEFAULT_CATALOG);
       setCatImages(res[3]&&Object.keys(res[3]).length>0?res[3]:DEFAULT_CAT_IMAGES);
@@ -927,6 +987,49 @@ export default function App(){
 
   var isAdmin=user&&user.role==="admin";
   var isEmp=user&&user.role==="employer";
+  // Offline photo queue: upload pending photos when connection returns
+  var syncBusy=useRef(false);
+  function syncPendingPhotos(){
+    if(syncBusy.current||!navigator.onLine)return;
+    pqAll(function(items){
+      if(!items||items.length===0)return;
+      syncBusy.current=true;
+      var remaining=items.length;
+      items.forEach(function(it){
+        uploadPhotoData(it.id,it.data).then(function(url){
+          pqRemove(it.id);
+          setProjects(function(prev){
+            var changed=false;
+            var next=prev.map(function(proj){
+              var doors2=(proj.doors||[]).map(function(d2){
+                if(!d2.steps)return d2;
+                var stepsChanged=false;var steps2={};
+                Object.keys(d2.steps).forEach(function(k){
+                  var st=d2.steps[k];
+                  if(st&&st.photos&&st.photos.some(function(p){return p.id===it.id;})){
+                    stepsChanged=true;
+                    steps2[k]=Object.assign({},st,{photos:st.photos.map(function(p){return p.id===it.id?Object.assign({},p,{data:url,pending:false}):p;})});
+                  }else steps2[k]=st;
+                });
+                if(!stepsChanged)return d2;
+                changed=true;return Object.assign({},d2,{steps:steps2});
+              });
+              return Object.assign({},proj,{doors:doors2});
+            });
+            return changed?next:prev;
+          });
+        }).catch(function(e2){console.error("sync photo",it.id,e2);}).finally(function(){remaining--;if(remaining<=0)syncBusy.current=false;});
+      });
+    });
+  }
+  useEffect(function(){
+    if(!ready)return;
+    syncPendingPhotos();
+    var onOn=function(){syncPendingPhotos();};
+    window.addEventListener("online",onOn);
+    var iv=setInterval(syncPendingPhotos,60000);
+    return function(){window.removeEventListener("online",onOn);clearInterval(iv);};
+  },[ready]);
   useEffect(function(){if(view==="doorDetail"){window.scrollTo(0,0);}else if(view==="projectDoors"){var y=listScrollRef.current;setTimeout(function(){window.scrollTo(0,y);},60);}},[view]);
   var selProj=null;projects.forEach(function(p){if(p.id===selProjId)selProj=p;});
   var selDoor=null;
@@ -1039,6 +1142,7 @@ export default function App(){
                   <div style={{position:"absolute",top:42,right:0,background:"#fef5eb",borderRadius:12,border:"1px solid #e67e2244",overflow:"hidden",zIndex:201,minWidth:210,boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
                     <button onClick={function(){importRef.current&&importRef.current.click();}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Kapı Listesi İçe Aktar</button>
                     <button onClick={function(){go("assignDoors");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📋 Kapı Ata</button>
+                    <button onClick={function(){go("daily");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📅 Günlük Rapor</button>
                     <button onClick={function(){go("report");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📊 Proje Raporu</button>
                     <button onClick={function(){go("hakedis");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>💰 Hakediş</button>
                     <button onClick={function(){go("qrLabels");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🏷 QR Etiketleri</button>
@@ -1101,6 +1205,34 @@ export default function App(){
       {/* ADMIN: PROJECT DOORS */}
       {(isAdmin||isEmp)&&view==="projectDoors"&&selProj&&(
         <div style={{padding:16}}>
+          {(function(){
+            var ds=selProj.doors||[];var tot=ds.length;
+            var c={yer:0,kasa:0,kanat:0,hw:0,test:0,fin:0};
+            ds.forEach(function(d2){
+              var st=d2.steps||{};
+              if(siteSt(d2)==="ready")c.yer++;
+              if(st.frame&&st.frame.done)c.kasa++;
+              if(st.leaf&&st.leaf.done)c.kanat++;
+              var hwDone=["hw_lock","hw_handle","hw_closer","hw_acc"].some(function(k){return st[k]&&st[k].done;});
+              if(hwDone)c.hw++;
+              if(st.hw_test&&st.hw_test.done)c.test++;
+              if(st.final&&st.final.done)c.fin++;
+            });
+            var stages=[["📍 Yer Hazır",c.yer,"#2a7fff"],["🏗 Kasa",c.kasa,"#e67e22"],["🚪 Kanat",c.kanat,"#e67e22"],["🔧 Hırdavat",c.hw,"#9b59b6"],["🧪 Test",c.test,"#16a085"],["✅ Teslim",c.fin,"#27ae60"]];
+            return(
+              <div style={{background:"#ffffff",borderRadius:12,padding:"12px 12px 8px",marginBottom:14,border:"1px solid #e8e8e8"}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#888",letterSpacing:1,marginBottom:8}}>📈 İŞ AKIŞI ({tot} KAPI)</div>
+                <div style={{display:"flex",gap:4,overflowX:"auto",paddingBottom:4}}>
+                  {stages.map(function(sg,i2){var pc=tot>0?Math.round(sg[1]/tot*100):0;return(
+                    <div key={i2} style={{flex:"1 0 auto",minWidth:72,textAlign:"center"}}>
+                      <div style={{fontSize:17,fontWeight:800,color:sg[2]}}>{sg[1]}</div>
+                      <div style={{fontSize:8.5,color:"#888",whiteSpace:"nowrap"}}>{sg[0]}</div>
+                      <div style={{height:4,background:"#f0f0f0",borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:pc+"%",height:"100%",background:sg[2]}}/></div>
+                      <div style={{fontSize:8,color:"#bbb",marginTop:2}}>%{pc}</div>
+                    </div>);})}
+                </div>
+              </div>);
+          })()}
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:16}}>
             {[{l:"Toplam",v:projStats(selProj.doors||[]).total,c:"#fff"},{l:"Bitti",v:projStats(selProj.doors||[]).done,c:"#4aff7a"},{l:"Aktif",v:projStats(selProj.doors||[]).active,c:"#4da6ff"},{l:"Sorun",v:projStats(selProj.doors||[]).issues,c:"#ff6b4a"}].map(function(s2){return <div key={s2.l} style={{background:"#ffffff",borderRadius:10,padding:"10px 6px",textAlign:"center",border:"1px solid #e8e8e8"}}><div style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:20,color:s2.c}}>{s2.v}</div><div style={{fontSize:9,color:"#888",textTransform:"uppercase",letterSpacing:1}}>{s2.l}</div></div>;})}
           </div>
@@ -1181,7 +1313,7 @@ export default function App(){
                               <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:15,color:"#1a1a2a"}}>#{door.code}</span>
                               <span style={{background:s2.bg,color:s2.fg,fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:600,textTransform:"uppercase"}}>{s2.lb}</span>
                               {door.hwSetNo&&<span style={{fontSize:8,background:"#f0f0f5",color:"#888",padding:"2px 5px",borderRadius:3}}>{door.hwSetNo}</span>}
-                              {(function(){var s3=siteSt(door);if(s3==="not_ready")return <span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL</span>;if(s3==="ready"&&p2===0)return <span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>;return null;})()}
+                              {(function(){var s3=siteSt(door);if(s3==="not_ready"){var rt4=reasonsText(door);return <span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL{rt4?" — "+rt4:""}</span>;}if(s3==="ready"&&p2===0)return <span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>;return null;})()}
                             </div>
                             <div style={{fontSize:12,color:"#888"}}>{door.kapiTipi}</div>
                             {door.mahal&&<div style={{fontSize:11,color:"#888"}}>📍 {door.mahal}</div>}
@@ -1277,7 +1409,7 @@ export default function App(){
             stepShort.forEach(function(s2){
               var hasIt=doorHasStep(d2,s2.id);
               if(!hasIt){row.push("—");row.push("");}
-              else if(s2.id==="site_check"){var sst4=siteSt(d2);if(sst4==="ready"){row.push("Hazır");var dt4=stepDate(d2,s2.id);row.push(dt4?fmtFull(dt4):"");}else if(sst4==="not_ready"){row.push("HAZIR DEĞİL");row.push("");}else{row.push("—");row.push("");}}
+              else if(s2.id==="site_check"){var sst4=siteSt(d2);if(sst4==="ready"){row.push("Hazır");var dt4=stepDate(d2,s2.id);row.push(dt4?fmtFull(dt4):"");}else if(sst4==="not_ready"){var rt5=reasonsText(d2);row.push("HAZIR DEĞİL"+(rt5?": "+rt5.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,"").trim():""));row.push("");}else{row.push("—");row.push("");}}
               else if(stepIssue(d2,s2.id)){row.push("⚠ Issue");row.push("");}
               else if(stepDone(d2,s2.id)){row.push("✓");var dt=stepDate(d2,s2.id);row.push(dt?fmtFull(dt):"");}
               else{row.push("—");row.push("");}
@@ -1342,7 +1474,7 @@ export default function App(){
                 var s=sd2.data;
                 html+="<div class='stepbox'><div class='stepname'>"+sd2.label;
                 var sEff=s.siteStatus==="not_ready"?"not_ready":((s.siteStatus==="ready"||s.done)?"ready":"");
-                if(sd2.label==="Yer Kontrolü"){if(sEff==="ready")html+=" <span class='status-ready'>✅ Hazır</span>";if(sEff==="not_ready")html+=" <span class='status-notready'>❌ Hazır Değil</span>";}
+                if(sd2.label==="Yer Kontrolü"){if(sEff==="ready")html+=" <span class='status-ready'>✅ Hazır</span>";if(sEff==="not_ready"){html+=" <span class='status-notready'>❌ Hazır Değil</span>";var rr6=(s.reasons||[]).map(reasonLabel).join(", ");if(rr6)html+=" <span class='status-notready' style='font-weight:normal'>("+rr6+")</span>";}}
                 else if(s.done)html+=" <span class='status-ready'>✓</span>";
                 html+="</div>";
                 if(s.completedAt)html+="<div class='stepdate'>🕐 "+new Date(s.completedAt).toLocaleDateString("tr-TR")+" "+new Date(s.completedAt).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
@@ -1562,6 +1694,53 @@ export default function App(){
       })()}
 
       {/* ADMIN: DOOR DETAIL */}
+      {isAdmin&&view==="daily"&&selProj&&(
+        <div style={{padding:16}}>
+          <button onClick={function(){go("projectDoors");}} style={{...B,background:"transparent",color:"#e67e22",fontSize:13,padding:"6px 0",marginBottom:10,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:18,fontWeight:700}}>←</span> Kapılara Dön</button>
+          <h2 style={{fontSize:18,fontWeight:700,margin:"0 0 12px",color:"#1a1a2a"}}>📅 Günlük Rapor</h2>
+          <input type="date" value={dailyDate} onChange={function(e){setDailyDate(e.target.value);}} style={{...INP,marginBottom:14,fontSize:15}}/>
+          {(function(){
+            var dayStart=new Date(dailyDate+"T00:00:00").getTime();var dayEnd=dayStart+86400000;
+            var evs=[];var photoCount=0;var doorSet={};
+            (selProj.doors||[]).forEach(function(d2){
+              (d2.changeLog||[]).forEach(function(lg){
+                if(lg.at>=dayStart&&lg.at<dayEnd){evs.push({at:lg.at,code:d2.code,mahal:d2.mahal||"",step:lg.step,action:lg.action,reason:lg.reason||"",by:lg.by||""});doorSet[d2.code]=true;}
+              });
+              var st=d2.steps||{};
+              Object.keys(st).forEach(function(k){
+                (st[k].photos||[]).forEach(function(p){if(p.at>=dayStart&&p.at<dayEnd)photoCount++;});
+              });
+            });
+            evs.sort(function(a,b){return a.at-b.at;});
+            var compl=evs.filter(function(e2){return e2.action==="completed";}).length;
+            var rev=evs.filter(function(e2){return e2.action==="reversed";}).length;
+            if(evs.length===0&&photoCount===0)return <div style={{textAlign:"center",color:"#888",padding:40,background:"#fff",borderRadius:12,border:"1px solid #e8e8e8"}}>Bu tarihte işlem yok.</div>;
+            return(
+              <div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:14}}>
+                  {[["İşlem",evs.length,"#1a1a2a"],["Tamamlanan",compl,"#27ae60"],["Geri Alınan",rev,"#e74c3c"],["Fotoğraf",photoCount,"#2a7fff"]].map(function(s3,i3){return(
+                    <div key={i3} style={{background:"#fff",borderRadius:10,padding:"10px 6px",textAlign:"center",border:"1px solid #e8e8e8"}}>
+                      <div style={{fontSize:18,fontWeight:800,color:s3[2]}}>{s3[1]}</div>
+                      <div style={{fontSize:9,color:"#888"}}>{s3[0]}</div>
+                    </div>);})}
+                </div>
+                <div style={{fontSize:11,color:"#888",marginBottom:10}}>🚪 {Object.keys(doorSet).length} kapıda çalışıldı: {Object.keys(doorSet).slice(0,20).map(function(c3){return "#"+c3;}).join(", ")}{Object.keys(doorSet).length>20?" …":""}</div>
+                {evs.map(function(e2,i3){return(
+                  <div key={i3} style={{background:"#fff",borderRadius:10,padding:"10px 12px",marginBottom:6,border:"1px solid #e8e8e8",borderLeft:"3px solid "+(e2.action==="completed"?"#27ae60":"#e74c3c")}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:13,color:"#1a1a2a"}}>#{e2.code}</span>
+                      <span style={{fontSize:11,color:"#888"}}>{new Date(e2.at).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})}</span>
+                    </div>
+                    <div style={{fontSize:12,color:e2.action==="completed"?"#27ae60":"#e74c3c",marginTop:2}}>{e2.step} — {e2.action==="completed"?"Tamamlandı":"Geri Alındı"}</div>
+                    {e2.mahal&&<div style={{fontSize:10,color:"#aaa"}}>📍 {e2.mahal}</div>}
+                    {e2.reason&&<div style={{fontSize:10,color:"#888",fontStyle:"italic"}}>Sebep: {e2.reason}</div>}
+                    <div style={{fontSize:10,color:"#e67e22",marginTop:2}}>👤 {e2.by}</div>
+                  </div>);})}
+              </div>);
+          })()}
+        </div>
+      )}
+
       {(isAdmin||isEmp)&&view==="doorDetail"&&selDoor&&(
         <DetailView door={selDoor} carpenters={carps} isAdmin={isAdmin} empMode={isEmp} empName={user?user.name:""} projectName={selProj?selProj.name:""} catalog={catalog} catImages={catImages} onUpdate={function(u){updateDoor(selProjId,u);}} onBack={function(){go("projectDoors");}}/>
       )}
@@ -1976,7 +2155,7 @@ export default function App(){
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
                     <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:15,color:"#1a1a2a"}}>#{door.code}</span>
                     <span style={{background:s2.bg,color:s2.fg,fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:600,textTransform:"uppercase"}}>{s2.lb}</span>
-                    {sss==="not_ready"&&<span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL</span>}
+                    {sss==="not_ready"&&<span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL{reasonsText(door)?" — "+reasonsText(door):""}</span>}
                     {sss==="ready"&&p2===0&&<span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>}
                   </div>
                   <div style={{fontSize:12,color:"#888"}}>{door.kapiTipi}</div>
