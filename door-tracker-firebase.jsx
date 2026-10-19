@@ -97,6 +97,13 @@ var SITE_REASONS=[
   {id:"engel",label:"🚧 Önü kapalı / malzeme var"},
   {id:"olcu",label:"📏 Ölçü uyumsuz"}
 ];
+// __PLAN_COORDS_START__
+var PLAN_COORDS={"KAT 10":{"7":{"x":66.29,"y":35.96},"3":{"x":25.82,"y":76.3},"2":{"x":40.24,"y":76.26},"1":{"x":50.65,"y":76.24},"11":{"x":94.31,"y":72.88},"10":{"x":94.31,"y":45.51},"9":{"x":94.24,"y":26.1},"5":{"x":45.96,"y":21.95},"6":{"x":61.18,"y":21.97},"40":{"x":5.97,"y":62.42},"8":{"x":67.97,"y":56.81},"14":{"x":26.46,"y":77.35},"17":{"x":40.83,"y":77.28},"20":{"x":49.84,"y":77.39},"15":{"x":26.21,"y":75.07},"18":{"x":40.78,"y":74.7},"24":{"x":94.12,"y":74.83},"21":{"x":51.33,"y":74.28},"23":{"x":90.27,"y":74.17},"13":{"x":5.68,"y":72.86},"25":{"x":94.28,"y":72.86},"16":{"x":26.12,"y":72.17},"19":{"x":40.16,"y":72.09},"22":{"x":51.49,"y":72.39},"26":{"x":91.87,"y":72.16},"27":{"x":93.85,"y":70.95},"28":{"x":88.88,"y":68.75},"29":{"x":92.56,"y":68.07},"12A":{"x":47.66,"y":61.17},"42":{"x":68.64,"y":60.22},"30":{"x":90.88,"y":61.66},"4":{"x":4.34,"y":58.73},"12":{"x":49.03,"y":58.83},"43":{"x":68.69,"y":58.82},"31":{"x":91.04,"y":58.88},"12B":{"x":58.79,"y":58.11},"43A":{"x":69.72,"y":57.42},"44":{"x":68.68,"y":53.72},"32":{"x":92.56,"y":49.25},"33":{"x":94.12,"y":45.69},"34":{"x":91.82,"y":44.99},"35":{"x":92.52,"y":42.88},"45":{"x":65.52,"y":37.54},"36":{"x":92.64,"y":37.87},"46":{"x":67.42,"y":34.27},"37":{"x":92.48,"y":30.9},"38":{"x":92.63,"y":28.92},"39":{"x":91.88,"y":27.15},"61":{"x":53.61,"y":26.01},"59":{"x":56.37,"y":26.26},"53":{"x":60.06,"y":26.28},"52":{"x":62.18,"y":26.16},"48":{"x":66.71,"y":26.35},"47":{"x":70.25,"y":26.48},"63":{"x":45.21,"y":24.98},"56":{"x":58.5,"y":24.81},"41":{"x":93.03,"y":24.64},"62":{"x":51.94,"y":23.83},"50":{"x":64.51,"y":24.0},"64":{"x":45.26,"y":23.24},"60":{"x":55.0,"y":23.11},"58":{"x":56.97,"y":23.47},"54":{"x":60.46,"y":23.44},"49":{"x":67.31,"y":23.14},"51":{"x":63.53,"y":22.3},"65":{"x":45.89,"y":21.45},"57":{"x":58.4,"y":21.67},"55":{"x":61.11,"y":21.53}},"KAT 11":{"75":{"x":26.19,"y":73.11},"77":{"x":41.43,"y":72.81},"82":{"x":50.79,"y":73.18},"79":{"x":48.56,"y":71.99},"84":{"x":93.52,"y":72.05},"74":{"x":26.93,"y":70.67},"76":{"x":42.11,"y":70.5},"78":{"x":47.64,"y":69.86},"80":{"x":49.44,"y":69.87},"81":{"x":51.51,"y":70.23},"83":{"x":89.52,"y":70.13},"85":{"x":92.54,"y":68.81},"66":{"x":4.66,"y":61.75},"67":{"x":5.7,"y":60.05},"70":{"x":65.12,"y":58.42},"86":{"x":68.68,"y":58.87},"68":{"x":6.48,"y":56.81},"69":{"x":18.88,"y":56.47},"71":{"x":29.73,"y":56.44},"72":{"x":37.54,"y":56.44},"73":{"x":50.14,"y":56.47},"87":{"x":67.09,"y":56.1},"88":{"x":68.77,"y":53.15},"92":{"x":44.81,"y":21.87},"90":{"x":58.9,"y":22.09},"89":{"x":62.97,"y":22.05},"93":{"x":45.65,"y":19.06},"91":{"x":60.55,"y":18.89}},"KAT 12":{"97":{"x":26.05,"y":73.37},"99":{"x":41.09,"y":73.27},"104":{"x":50.81,"y":73.53},"100":{"x":45.94,"y":72.52},"101":{"x":48.27,"y":72.53},"107":{"x":94.13,"y":72.44},"96":{"x":26.9,"y":70.78},"98":{"x":41.96,"y":70.59},"102":{"x":49.75,"y":70.26},"103":{"x":51.85,"y":70.72},"105":{"x":90.25,"y":70.61},"106":{"x":93.13,"y":69.24},"94":{"x":4.86,"y":62.24},"95":{"x":5.12,"y":59.02},"108":{"x":67.32,"y":58.69},"109":{"x":66.98,"y":56.34},"110":{"x":67.64,"y":52.13},"111":{"x":63.26,"y":22.27},"115":{"x":44.36,"y":21.72},"112":{"x":58.63,"y":21.76},"113":{"x":60.79,"y":21.6},"117":{"x":39.72,"y":20.89},"116":{"x":45.89,"y":19.02},"114":{"x":61.29,"y":19.05}},"KAT 20":{"129":{"x":26.63,"y":73.4},"131":{"x":41.41,"y":73.59},"136":{"x":51.49,"y":73.59},"132":{"x":46.53,"y":72.48},"128":{"x":27.15,"y":70.78},"130":{"x":42.61,"y":71.05},"133":{"x":48.15,"y":70.45},"134":{"x":49.9,"y":70.5},"135":{"x":52.01,"y":70.81},"137":{"x":90.61,"y":70.53},"139":{"x":94.56,"y":71.68},"138":{"x":92.61,"y":69.5},"118":{"x":5.03,"y":62.33},"119":{"x":6.24,"y":60.7},"126":{"x":48.93,"y":59.81},"145":{"x":66.01,"y":59.98},"147":{"x":69.03,"y":58.15},"121":{"x":15.49,"y":57.08},"146":{"x":66.29,"y":57.43},"148":{"x":67.44,"y":56.34},"140":{"x":92.93,"y":45.21},"142":{"x":94.53,"y":43.13},"141":{"x":92.69,"y":41.85},"150":{"x":67.04,"y":35.86},"151":{"x":67.45,"y":33.37},"143":{"x":92.87,"y":26.16},"152":{"x":67.72,"y":24.8},"144":{"x":94.16,"y":23.59},"154":{"x":64.74,"y":23.18},"159":{"x":44.98,"y":22.24},"157":{"x":58.71,"y":22.42},"156":{"x":60.91,"y":22.14},"160":{"x":40.28,"y":21.3},"153":{"x":68.3,"y":21.15},"158":{"x":46.26,"y":19.53},"155":{"x":61.39,"y":19.49},"127":{"x":54.21,"y":57.26},"149":{"x":69.22,"y":52.52},"122":{"x":25.12,"y":57.87},"123":{"x":27.19,"y":58.04},"124":{"x":31.11,"y":58.35},"125":{"x":40.57,"y":59.13},"120":{"x":6.4,"y":57.7}},"KAT 21":{"170":{"x":26.48,"y":72.97},"172":{"x":41.41,"y":73.09},"177":{"x":51.55,"y":73.04},"174":{"x":49.11,"y":72.27},"180":{"x":94.39,"y":71.89},"169":{"x":27.41,"y":70.89},"171":{"x":42.47,"y":70.32},"173":{"x":47.96,"y":70.09},"175":{"x":50.09,"y":70.01},"176":{"x":52.17,"y":70.44},"178":{"x":90.73,"y":70.14},"179":{"x":93.04,"y":69.07},"161":{"x":4.89,"y":61.83},"162":{"x":6.0,"y":60.19},"187":{"x":67.15,"y":57.52},"163":{"x":5.99,"y":56.45},"164":{"x":18.8,"y":56.42},"165":{"x":26.76,"y":56.37},"166":{"x":29.77,"y":56.4},"167":{"x":37.82,"y":56.38},"168":{"x":50.1,"y":56.42},"182":{"x":94.64,"y":42.19},"181":{"x":92.87,"y":41.53},"183":{"x":93.07,"y":28.39},"184":{"x":93.82,"y":25.49},"185":{"x":94.47,"y":22.76},"188":{"x":62.9,"y":21.85},"193":{"x":44.98,"y":21.28},"191":{"x":58.74,"y":21.42},"190":{"x":60.77,"y":21.3},"194":{"x":39.83,"y":20.59},"192":{"x":46.28,"y":18.72},"189":{"x":61.49,"y":18.71},"186":{"x":70.45,"y":56.82}},"KAT 22":{"197":{"x":25.49,"y":72.8},"199":{"x":41.56,"y":73.11},"205":{"x":51.34,"y":72.93},"202":{"x":48.18,"y":71.95},"208":{"x":94.08,"y":71.83},"198":{"x":27.08,"y":70.39},"200":{"x":42.25,"y":70.19},"201":{"x":46.85,"y":69.77},"203":{"x":50.16,"y":69.94},"204":{"x":52.0,"y":70.25},"206":{"x":90.55,"y":70.15},"207":{"x":92.54,"y":69.02},"195":{"x":4.93,"y":61.75},"196":{"x":5.63,"y":58.72},"217":{"x":69.17,"y":58.66},"218":{"x":67.04,"y":57.71},"218A":{"x":69.62,"y":52.5},"209":{"x":94.13,"y":44.49},"210":{"x":92.84,"y":41.59},"213":{"x":88.34,"y":27.86},"215":{"x":91.77,"y":23.61},"222":{"x":44.44,"y":21.65},"220":{"x":59.62,"y":21.9},"219":{"x":63.29,"y":22.05},"224":{"x":39.61,"y":20.69},"223":{"x":46.07,"y":18.75},"221":{"x":61.3,"y":18.8},"216":{"x":94.44,"y":24.88},"212":{"x":87.07,"y":30.04},"211":{"x":88.51,"y":29.85},"214":{"x":90.09,"y":27.22}},"KAT 30":{"238":{"x":26.56,"y":79.67},"239":{"x":41.77,"y":79.61},"245":{"x":51.45,"y":79.61},"242":{"x":48.46,"y":78.67},"237":{"x":27.43,"y":77.56},"250":{"x":94.72,"y":77.45},"240":{"x":42.57,"y":77.09},"241":{"x":46.64,"y":76.54},"243":{"x":49.81,"y":76.39},"244":{"x":52.1,"y":76.95},"248":{"x":90.25,"y":76.72},"249":{"x":92.9,"y":75.54},"247":{"x":67.07,"y":73.16},"225":{"x":5.17,"y":68.35},"226":{"x":5.99,"y":66.62},"256":{"x":65.63,"y":65.97},"227":{"x":7.31,"y":64.62},"258":{"x":69.18,"y":64.59},"228":{"x":15.43,"y":63.37},"229":{"x":24.0,"y":62.98},"232":{"x":31.46,"y":63.21},"233":{"x":39.41,"y":63.04},"236":{"x":50.54,"y":63.27},"259":{"x":67.57,"y":62.23},"260":{"x":69.54,"y":61.4},"261":{"x":68.71,"y":58.26},"251":{"x":94.57,"y":48.93},"252":{"x":92.73,"y":48.03},"262":{"x":66.81,"y":42.07},"263":{"x":67.54,"y":39.16},"253":{"x":93.02,"y":32.64},"254":{"x":94.46,"y":31.55},"271":{"x":45.69,"y":29.11},"269":{"x":58.77,"y":28.36},"265":{"x":65.4,"y":28.39},"255":{"x":94.03,"y":28.27},"278":{"x":39.09,"y":26.92},"276":{"x":41.23,"y":26.79},"272":{"x":46.19,"y":26.76},"270":{"x":54.64,"y":26.85},"267":{"x":61.38,"y":26.49},"266":{"x":62.79,"y":25.92},"279":{"x":37.47,"y":24.34},"277":{"x":40.24,"y":24.2},"275":{"x":43.07,"y":24.31},"273":{"x":45.34,"y":24.43},"268":{"x":60.86,"y":24.53},"264":{"x":66.03,"y":24.8},"279A":{"x":33.83,"y":20.82},"278A":{"x":33.79,"y":19.39},"277A":{"x":33.78,"y":18.05},"276A":{"x":33.73,"y":16.76},"275A":{"x":33.71,"y":15.4},"273A":{"x":33.7,"y":14.26},"280A":{"x":57.37,"y":13.18},"280":{"x":67.54,"y":12.75},"281":{"x":69.5,"y":10.59},"280B":{"x":30.89,"y":8.83},"234":{"x":42.25,"y":63.18},"246":{"x":64.02,"y":75.71},"257":{"x":67.57,"y":65.56},"230":{"x":26.12,"y":63.2},"231":{"x":27.14,"y":63.8},"235":{"x":48.81,"y":63.6},"274":{"x":42.92,"y":25.37}},"KAT 31":{"290":{"x":26.12,"y":79.52},"292":{"x":41.37,"y":79.5},"298":{"x":50.68,"y":79.55},"295":{"x":48.46,"y":78.75},"291":{"x":26.92,"y":77.45},"293":{"x":42.12,"y":76.9},"297":{"x":51.49,"y":76.87},"294":{"x":47.34,"y":76.44},"296":{"x":49.42,"y":76.43},"299":{"x":94.03,"y":76.04},"282":{"x":4.55,"y":68.33},"302":{"x":68.89,"y":65.14},"284":{"x":6.23,"y":63.07},"285":{"x":18.97,"y":63.01},"286":{"x":26.43,"y":62.9},"287":{"x":29.22,"y":62.9},"288":{"x":36.4,"y":62.84},"289":{"x":49.87,"y":62.86},"303":{"x":68.54,"y":62.89},"304":{"x":66.51,"y":41.89},"305":{"x":66.69,"y":39.17},"301":{"x":92.28,"y":32.47},"306":{"x":67.2,"y":29.03},"308":{"x":60.03,"y":28.25},"310":{"x":56.58,"y":27.77},"307":{"x":68.0,"y":26.33},"309":{"x":60.93,"y":25.37},"311":{"x":68.52,"y":12.84},"300":{"x":93.96,"y":31.57},"283":{"x":4.74,"y":66.26}},"KAT 32":{"314":{"x":26.1,"y":79.36},"316":{"x":41.11,"y":79.46},"322":{"x":51.05,"y":79.2},"318":{"x":46.16,"y":78.27},"319":{"x":48.51,"y":78.46},"315":{"x":26.91,"y":76.45},"317":{"x":42.09,"y":76.38},"321":{"x":51.72,"y":76.55},"320":{"x":49.78,"y":76.01},"323":{"x":94.51,"y":75.89},"312":{"x":4.67,"y":68.13},"313":{"x":5.45,"y":64.92},"330":{"x":68.78,"y":65.0},"331":{"x":68.74,"y":62.11},"332":{"x":66.93,"y":41.53},"333":{"x":67.25,"y":39.06},"324":{"x":89.47,"y":37.08},"325":{"x":87.12,"y":35.77},"326":{"x":89.31,"y":34.84},"327":{"x":90.04,"y":33.8},"328":{"x":92.23,"y":31.17},"334":{"x":68.08,"y":30.16},"329":{"x":94.24,"y":29.07},"336":{"x":60.3,"y":27.6},"335":{"x":68.27,"y":26.61},"337":{"x":61.19,"y":24.75}},"KAT 33":{"352":{"x":91.03,"y":80.6},"353":{"x":93.3,"y":80.53},"340":{"x":26.47,"y":79.31},"342":{"x":41.56,"y":79.22},"349":{"x":51.2,"y":79.22},"345":{"x":47.97,"y":78.83},"351":{"x":90.56,"y":78.77},"354":{"x":93.22,"y":78.3},"341":{"x":26.8,"y":76.19},"343":{"x":42.42,"y":76.85},"344":{"x":46.58,"y":76.28},"346":{"x":48.48,"y":76.21},"347":{"x":50.22,"y":76.22},"348":{"x":51.93,"y":76.59},"350":{"x":91.63,"y":77.11},"355":{"x":94.51,"y":75.97},"338":{"x":5.24,"y":67.95},"339":{"x":5.53,"y":64.95},"359":{"x":69.13,"y":64.93},"360":{"x":69.07,"y":62.17},"361":{"x":67.07,"y":41.52},"362":{"x":67.32,"y":39.43},"356":{"x":92.82,"y":34.76},"357":{"x":91.8,"y":31.54},"358":{"x":94.45,"y":29.19}}};
+// __PLAN_COORDS_END__
+var PLAN_FLOORS=Object.keys(PLAN_COORDS);
+function doorFloor(door){var m=/KAT\s*\d+/.exec(door.mahal||"");return m?m[0].replace(/\s+/," "):"";}
+function planHasDoor(door){var fl=doorFloor(door);return !!(PLAN_COORDS[fl]&&PLAN_COORDS[fl][door.code]);}
+
 function reasonLabel(id){for(var i=0;i<SITE_REASONS.length;i++){if(SITE_REASONS[i].id===id)return SITE_REASONS[i].label;}return id;}
 function siteReasons(door){var ss=(door.steps&&door.steps.site_check)||{};return ss.reasons||[];}
 function reasonsText(door){var r=siteReasons(door);if(r.length===0)return"";return r.map(reasonLabel).join(", ");}
@@ -810,7 +817,7 @@ function PhotoViewer(props){var p=props.photo;var onClose=props.onClose;if(!p)re
 function StepRow(props){var step=props.step;var data=props.data||{};var readOnly=props.readOnly;var onView=props.onView;var onToggle=props.onToggle;var onNote=props.onNote;var onIssue=props.onIssue;var onPhoto=props.onPhoto;var onRmPhoto=props.onRmPhoto;var origDone=props.origDone;var onSiteStatus=props.onSiteStatus;var onReasons=props.onReasons;var expS=useState(false);var exp=expS[0],setExp=expS[1];var done=!!data.done;var hasIssue=!!data.issue;var isLocked=done&&origDone;var isSite=step.id==="site_check";var siteStatus=data.siteStatus||"";var effReady=isSite&&siteStatus!=="not_ready"&&(siteStatus==="ready"||done);return(<div style={{background:"#ffffff",borderRadius:10,border:"1px solid "+(done?"#27ae6044":hasIssue?"#e74c3c44":siteStatus==="not_ready"?"#e74c3c44":"#222"),overflow:"hidden",marginBottom:6}}><div style={{display:"flex",alignItems:"center",padding:"10px 12px",gap:10,cursor:"pointer"}} onClick={function(){setExp(!exp);}}><div onClick={function(e){e.stopPropagation();if(!isSite&&!readOnly)onToggle(step.id);}} style={{width:26,height:26,borderRadius:6,border:"2px solid "+(done?"#4aff7a":hasIssue||siteStatus==="not_ready"?"#ff6b4a":"#444"),background:done?"rgba(74,255,122,0.15)":siteStatus==="not_ready"?"rgba(255,107,74,0.1)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,cursor:"pointer"}}>{(done||effReady)&&<span style={{color:"#27ae60",fontSize:14,fontWeight:700}}>{isLocked?"🔒":"✓"}</span>}{isSite&&siteStatus==="not_ready"&&!done&&<span style={{color:"#e74c3c",fontSize:14,fontWeight:700}}>✕</span>}</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:500,color:done?"#4aff7a":siteStatus==="not_ready"?"#ff6b4a":hasIssue?"#ff6b4a":"#ccc"}}>{step.label}{effReady?" — ✅ Hazır":""}{isSite&&siteStatus==="not_ready"?" — ❌ Hazır Değil":""}</div>{data.completedAt&&<div style={{fontSize:9,color:"#aaa",marginTop:1}}>{fmtD(data.completedAt)}</div>}</div><span style={{color:"#bbb",fontSize:12}}>{exp?"▲":"▼"}</span></div>{exp&&(<div style={{padding:"0 12px 12px",borderTop:"1px solid #e8e8e8"}}>{isSite&&(<div style={{display:"flex",gap:8,marginTop:8,marginBottom:8}}><button onClick={function(){onSiteStatus(step.id,"ready");}} style={{...B,flex:1,background:effReady?"#27ae60":"#f0faf3",color:effReady?"#fff":"#27ae60",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #27ae60"}}>✅ Hazır</button><button onClick={function(){onSiteStatus(step.id,"not_ready");}} style={{...B,flex:1,background:siteStatus==="not_ready"?"#e74c3c":"#fde8e8",color:siteStatus==="not_ready"?"#fff":"#e74c3c",padding:"12px 8px",fontSize:13,fontWeight:600,borderRadius:10,border:"2px solid #e74c3c"}}>❌ Hazır Değil</button></div>)}{isSite&&siteStatus==="not_ready"&&(<div style={{marginBottom:8}}><div style={{fontSize:10,color:"#888",marginBottom:6}}>Sebep seçin (birden fazla olabilir):</div><div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{SITE_REASONS.map(function(r2){var sel=(data.reasons||[]).indexOf(r2.id)>=0;return <span key={r2.id} onClick={function(){if(readOnly&&!isSite)return;var cur=(data.reasons||[]).slice();var ix=cur.indexOf(r2.id);if(ix>=0)cur.splice(ix,1);else cur.push(r2.id);if(onReasons)onReasons(step.id,cur);}} style={{fontSize:11,padding:"7px 10px",borderRadius:8,cursor:"pointer",background:sel?"#e74c3c":"#fff",color:sel?"#fff":"#888",border:"1.5px solid "+(sel?"#e74c3c":"#ddd"),fontWeight:sel?600:400}}>{sel?"✓ ":""}{r2.label}</span>;})}</div>{(!data.reasons||data.reasons.length===0)&&<div style={{fontSize:10,color:"#e67e22",marginTop:5}}>⚠️ Sebep seçilmedi</div>}</div>)}{!readOnly&&<div style={{marginTop:8}}><Photos photos={data.photos||[]} onAdd={function(p){onPhoto(step.id,p);}} onRemove={function(pid){onRmPhoto(step.id,pid);}} onView={onView}/></div>}{readOnly&&data.photos&&data.photos.length>0&&(<div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>{data.photos.map(function(p){return <img key={p.id} src={p.data} onClick={function(e){e.stopPropagation();if(onView)onView(p);}} style={{width:56,height:56,objectFit:"cover",borderRadius:6,border:"1px solid #ddd",cursor:"pointer"}}/>;})}</div>)}{!readOnly&&<div style={{marginTop:8}}><textarea value={data.notes||""} onChange={function(e){onNote(step.id,e.target.value);}} placeholder={isSite?"Yer durumu notu... (sıva, ölçü, engel vs.)":"Not ekleyin..."} rows={2} style={{...INP,fontSize:12,resize:"vertical"}}/></div>}{readOnly&&data.notes&&<div style={{marginTop:8,fontSize:12,color:"#888",background:"#f7f7f7",borderRadius:8,padding:"8px 10px"}}>📝 {data.notes}</div>}{!isSite&&!readOnly&&<button onClick={function(){onIssue(step.id,!hasIssue);}} style={{...B,marginTop:6,background:hasIssue?"#fde8e8":"#1a1a2a",color:hasIssue?"#ff6b4a":"#888",fontSize:11,padding:"6px 10px",border:"1px solid "+(hasIssue?"#e74c3c44":"#333")}}>{hasIssue?"⚠️ Sorun İşaretli — Kaldır":"⚠️ Sorun Bildir"}</button>}</div>)}</div>);}
 
 function DetailView(props){
-  var door=props.door;var carps=props.carpenters;var isAdmin=props.isAdmin;var empMode=props.empMode;var empName=props.empName;var pvS=useState(null);var viewPhoto=pvS[0],setViewPhoto=pvS[1];
+  var door=props.door;var carps=props.carpenters;var isAdmin=props.isAdmin;var empMode=props.empMode;var empName=props.empName;var onShowPlan=props.onShowPlan;var pvS=useState(null);var viewPhoto=pvS[0],setViewPhoto=pvS[1];
   var projName=props.projectName;var onUpdate=props.onUpdate;var onBack=props.onBack;
   var catalog=props.catalog||[];
   var catImages=props.catImages||{};
@@ -836,7 +843,10 @@ function DetailView(props){
   return(
     <div style={{padding:16,paddingBottom:100}}>
       <PhotoViewer photo={viewPhoto} onClose={function(){setViewPhoto(null);}}/>
-      {onBack&&(<button onClick={onBack} style={{...B,background:"transparent",color:"#e67e22",fontSize:13,padding:"6px 0",marginBottom:10,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:18,fontWeight:700}}>←</span> Kapılara Dön</button>)}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        {onBack?(<button onClick={onBack} style={{...B,background:"transparent",color:"#e67e22",fontSize:13,padding:"6px 0",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:18,fontWeight:700}}>←</span> Kapılara Dön</button>):<span/>}
+        {onShowPlan&&planHasDoor(edit)&&(<button onClick={function(){onShowPlan(edit);}} style={{...B,background:"#eaf1ff",color:"#2a7fff",fontSize:12,padding:"7px 12px",border:"1px solid #2a7fff44"}}>🗺 Planda Göster</button>)}
+      </div>
       <div style={{background:"linear-gradient(135deg,"+s.bg+",#fef5eb)",borderRadius:14,padding:16,marginBottom:16,border:"1px solid "+s.fg+"33"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
           <div style={{flex:1}}>
@@ -958,9 +968,15 @@ export default function App(){
   var empsS=useState([]);var emps=empsS[0],setEmps=empsS[1];
   var sfS=useState("all");var siteFilter=sfS[0],setSiteFilter=sfS[1];
   var ddS=useState(new Date().toISOString().slice(0,10));var dailyDate=ddS[0],setDailyDate=ddS[1];
+  var pkS=useState(PLAN_FLOORS[0]||"");var planKat=pkS[0],setPlanKat=pkS[1];
+  var pfS=useState(null);var planFocus=pfS[0],setPlanFocus=pfS[1];
+  var pzS=useState(1);var planZoom=pzS[0],setPlanZoom=pzS[1];
+  var puS=useState({});var planUrls=puS[0],setPlanUrls=puS[1];
+  var planScrollRef=useRef(null);
+  var planUpRef=useRef(null);
 
   useEffect(function(){
-    Promise.all([loadProjects(),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices"),sGet("dtv7-emp")]).then(function(res){
+    Promise.all([loadProjects(),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices"),sGet("dtv7-emp"),sGet("dtv7-plans")]).then(function(res){
       remoteUpdate.current=true;
       var loadedProj=res[0]&&res[0].length>0?res[0]:[SIGMA_PROJECT];
       var defaults=[SIGMA_PROJECT];
@@ -973,6 +989,7 @@ export default function App(){
       setCatImages(res[3]&&Object.keys(res[3]).length>0?res[3]:DEFAULT_CAT_IMAGES);
       setPrices(res[4]&&Object.keys(res[4]).length>0?res[4]:DEFAULT_PRICES);
       setEmps(res[5]&&res[5].length>0?res[5]:[]);
+      setPlanUrls(res[6]&&typeof res[6]==="object"?res[6]:{});
       setReady(true);
       setTimeout(function(){remoteUpdate.current=false;},500);
     });
@@ -1031,6 +1048,17 @@ export default function App(){
     return function(){window.removeEventListener("online",onOn);clearInterval(iv);};
   },[ready]);
   useEffect(function(){if(view==="doorDetail"){window.scrollTo(0,0);}else if(view==="projectDoors"){var y=listScrollRef.current;setTimeout(function(){window.scrollTo(0,y);},60);}},[view]);
+  useEffect(function(){
+    if(view!=="floorplan"||!planFocus)return;
+    var co=(PLAN_COORDS[planKat]||{})[planFocus];if(!co)return;
+    var t=setTimeout(function(){
+      var el=planScrollRef.current;if(!el)return;
+      var inner=el.firstChild;if(!inner)return;
+      el.scrollLeft=inner.offsetWidth*co.x/100-el.clientWidth/2;
+      el.scrollTop=inner.offsetHeight*co.y/100-el.clientHeight/2;
+    },350);
+    return function(){clearTimeout(t);};
+  },[view,planFocus,planKat,planZoom,planUrls]);
   var selProj=null;projects.forEach(function(p){if(p.id===selProjId)selProj=p;});
   var selDoor=null;
   if(selProj&&selProj.doors){selProj.doors.forEach(function(d){if(d.id===selDoorId)selDoor=d;});}
@@ -1040,7 +1068,7 @@ export default function App(){
 
   function goBack(){
     if(view==="doorDetail")go("projectDoors");
-    else if(view==="report"||view==="hakedis"||view==="qrLabels")go("projectDoors");
+    else if(view==="report"||view==="hakedis"||view==="qrLabels"||view==="floorplan"||view==="daily")go("projectDoors");
     else if(view==="projectDoors"||view==="addProject"||view==="carpenters"||view==="assignDoors"||view==="hwCatalog"||view==="dashboard")go("projects");
   }
 
@@ -1116,6 +1144,29 @@ export default function App(){
       <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
       <input ref={importRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleImport} style={{display:"none"}}/>
       <input ref={catalogRef} type="file" accept=".xlsx,.xls" onChange={handleCatalogImport} style={{display:"none"}}/>
+      <input ref={planUpRef} type="file" accept="image/*" multiple onChange={function(e){
+        var files=Array.prototype.slice.call(e.target.files||[]);e.target.value="";
+        if(files.length===0)return;
+        showToast(true,"Planlar yükleniyor... 0/"+files.length);
+        var doneN=0;var merged=Object.assign({},planUrls);
+        var seq=Promise.resolve();
+        files.forEach(function(f){
+          seq=seq.then(function(){return new Promise(function(resolve){
+            var m=/kat[_\-\s]?(\d+)/i.exec(f.name);
+            if(!m){doneN++;resolve();return;}
+            var katKey="KAT "+parseInt(m[1],10);
+            var rd=new FileReader();
+            rd.onload=function(ev){
+              uploadString(storageRef(storage,"plans/kat"+m[1]+".jpg"),ev.target.result,"data_url").then(function(snap){return getDownloadURL(snap.ref);}).then(function(url){
+                merged[katKey]=url;doneN++;showToast(true,"Planlar yükleniyor... "+doneN+"/"+files.length);resolve();
+              }).catch(function(err){console.error(err);doneN++;showToast(false,katKey+" yüklenemedi");resolve();});
+            };
+            rd.onerror=function(){doneN++;resolve();};
+            rd.readAsDataURL(f);
+          });});
+        });
+        seq.then(function(){setPlanUrls(merged);sSet("dtv7-plans",merged);showToast(true,"✅ Kat planları hazır ("+Object.keys(merged).length+" kat)");});
+      }} style={{display:"none"}}/>
 
       {/* HEADER */}
       <div style={{background:headerBg,padding:"16px 16px 12px",borderBottom:"1px solid #e67e2244",position:"sticky",top:0,zIndex:100}}>
@@ -1143,10 +1194,12 @@ export default function App(){
                     <button onClick={function(){importRef.current&&importRef.current.click();}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Kapı Listesi İçe Aktar</button>
                     <button onClick={function(){go("assignDoors");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📋 Kapı Ata</button>
                     <button onClick={function(){go("daily");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📅 Günlük Rapor</button>
+                    {PLAN_FLOORS.length>0&&<button onClick={function(){setPlanFocus(null);go("floorplan");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗺 Kat Planı</button>}
+                    {PLAN_FLOORS.length>0&&<button onClick={function(){planUpRef.current&&planUpRef.current.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#9b59b6",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗺 Kat Planları Yükle ({Object.keys(planUrls).length}/{PLAN_FLOORS.length})</button>}
                     <button onClick={function(){go("report");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📊 Proje Raporu</button>
                     <button onClick={function(){go("hakedis");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>💰 Hakediş</button>
                     <button onClick={function(){go("qrLabels");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🏷 QR Etiketleri</button>
-                    <button onClick={function(){var data={"dtv7-proj":JSON.stringify(projects),"dtv7-carp":JSON.stringify(carps),"dtv7-cat":JSON.stringify(catalog),"dtv7-cimg":JSON.stringify(catImages),"dtv7-prices":JSON.stringify(prices),"dtv7-emp":JSON.stringify(emps)};var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
+                    <button onClick={function(){var data={"dtv7-proj":JSON.stringify(projects),"dtv7-carp":JSON.stringify(carps),"dtv7-cat":JSON.stringify(catalog),"dtv7-cimg":JSON.stringify(catImages),"dtv7-prices":JSON.stringify(prices),"dtv7-emp":JSON.stringify(emps),"dtv7-plans":JSON.stringify(planUrls)};var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
                     <button onClick={function(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(ev){try{var data=JSON.parse(ev.target.result);var keys=Object.keys(data);var promises=keys.map(function(k){return sSet(k,JSON.parse(data[k]));});Promise.all(promises).then(function(){window.location.reload();});}catch(err){alert("Hatalı dosya");}};rd.readAsText(f);};inp.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#2a7fff",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Veri Geri Yükle</button>
                     <button onClick={function(){if(window.confirm("Tüm kapılar silinsin mi?")){setProjects(function(p){var next=p.map(function(proj){if(proj.id!==selProjId)return proj;return Object.assign({},proj,{doors:[]});});return next;});setMenuOpen(false);}}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",color:"#e74c3c",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗑 Kapıları Temizle</button>
                   </div>
@@ -1694,6 +1747,56 @@ export default function App(){
       })()}
 
       {/* ADMIN: DOOR DETAIL */}
+      {(isAdmin||isEmp)&&view==="floorplan"&&selProj&&(function(){
+        var coords=PLAN_COORDS[planKat]||{};
+        var imgUrl=planUrls[planKat];
+        var codeToDoor={};(selProj.doors||[]).forEach(function(d2){codeToDoor[d2.code]=d2;});
+        function dotColor(d2){
+          if(!d2)return "#bbbbbb";
+          var p3=pct(d2);if(p3>=100)return "#27ae60";
+          var s3=siteSt(d2);
+          if(s3==="not_ready")return "#e74c3c";
+          if(p3>0)return "#4da6ff";
+          if(s3==="ready")return "#2ecc71";
+          return "#9aa0a6";
+        }
+        var stats={gri:0,red:0,grn:0,blu:0,done:0};
+        Object.keys(coords).forEach(function(c3){var d2=codeToDoor[c3];if(!d2){return;}var p3=pct(d2);var s3=siteSt(d2);if(p3>=100)stats.done++;else if(s3==="not_ready")stats.red++;else if(p3>0)stats.blu++;else if(s3==="ready")stats.grn++;else stats.gri++;});
+        return(
+        <div style={{padding:"12px 0 24px"}}>
+          <div style={{padding:"0 16px"}}>
+            <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:8}}>
+              {PLAN_FLOORS.map(function(fl){return <button key={fl} onClick={function(){setPlanKat(fl);setPlanFocus(null);}} style={{...B,flexShrink:0,background:planKat===fl?"#e67e22":"#fff",color:planKat===fl?"#fff":"#888",fontSize:12,padding:"7px 12px",border:"1px solid "+(planKat===fl?"#e67e22":"#ddd")}}>{fl}</button>;})}
+            </div>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap",fontSize:10,color:"#888",margin:"4px 0 8px"}}>
+              <span>⚪ Kontrolsüz {stats.gri}</span><span style={{color:"#e74c3c"}}>🔴 Hazır Değil {stats.red}</span><span style={{color:"#2ecc71"}}>🟢 Yer Hazır {stats.grn}</span><span style={{color:"#4da6ff"}}>🔵 Montajda {stats.blu}</span><span style={{color:"#27ae60"}}>✅ Bitti {stats.done}</span>
+            </div>
+            <div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center"}}>
+              <button onClick={function(){setPlanZoom(Math.max(1,planZoom-1));}} style={{...B,background:"#fff",border:"1px solid #ddd",color:"#555",fontSize:16,width:36,height:32,padding:0}}>−</button>
+              <span style={{fontSize:12,color:"#888",minWidth:30,textAlign:"center"}}>{planZoom}x</span>
+              <button onClick={function(){setPlanZoom(Math.min(6,planZoom+1));}} style={{...B,background:"#fff",border:"1px solid #ddd",color:"#555",fontSize:16,width:36,height:32,padding:0}}>+</button>
+              <span style={{fontSize:10,color:"#aaa"}}>Sürükleyerek gezin · noktaya dokun</span>
+            </div>
+          </div>
+          {!imgUrl&&(<div style={{margin:"0 16px",textAlign:"center",color:"#888",padding:40,background:"#fff",borderRadius:12,border:"1px dashed #ccc"}}>Bu katın plan görseli yüklenmemiş.<br/>{isAdmin?"Menüden \"🗺 Kat Planları Yükle\" ile yükleyin.":"Yöneticinize bildirin."}</div>)}
+          {imgUrl&&(
+          <div ref={planScrollRef} style={{overflow:"auto",WebkitOverflowScrolling:"touch",border:"1px solid #e0e0e0",background:"#fff"}}>
+            <div style={{position:"relative",width:(planZoom*100)+"%"}}>
+              <img src={imgUrl} style={{width:"100%",display:"block"}} alt=""/>
+              {Object.keys(coords).map(function(c3){
+                var pos=coords[c3];var d2=codeToDoor[c3];var col=dotColor(d2);
+                var isF=planFocus===c3;
+                return(
+                <div key={c3} onClick={function(){if(d2){listScrollRef.current=0;setSelDoorId(d2.id);go("doorDetail");}}} style={{position:"absolute",left:pos.x+"%",top:pos.y+"%",transform:"translate(-50%,-50%)",cursor:d2?"pointer":"default",zIndex:isF?20:10,textAlign:"center"}}>
+                  <div style={{width:isF?22:(planZoom>=2?16:11),height:isF?22:(planZoom>=2?16:11),borderRadius:"50%",background:col,border:"2px solid #fff",boxShadow:isF?"0 0 0 5px rgba(230,126,34,0.45),0 1px 4px rgba(0,0,0,0.4)":"0 1px 3px rgba(0,0,0,0.4)",margin:"0 auto"}}/>
+                  {(planZoom>=2||isF)&&<div style={{fontSize:planZoom>=3?11:9,fontWeight:700,color:"#1a1a2a",background:"#ffffffcc",borderRadius:3,padding:"0 3px",marginTop:1,whiteSpace:"nowrap"}}>{c3}</div>}
+                </div>);
+              })}
+            </div>
+          </div>)}
+        </div>);
+      })()}
+
       {isAdmin&&view==="daily"&&selProj&&(
         <div style={{padding:16}}>
           <button onClick={function(){go("projectDoors");}} style={{...B,background:"transparent",color:"#e67e22",fontSize:13,padding:"6px 0",marginBottom:10,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:18,fontWeight:700}}>←</span> Kapılara Dön</button>
@@ -1742,7 +1845,7 @@ export default function App(){
       )}
 
       {(isAdmin||isEmp)&&view==="doorDetail"&&selDoor&&(
-        <DetailView door={selDoor} carpenters={carps} isAdmin={isAdmin} empMode={isEmp} empName={user?user.name:""} projectName={selProj?selProj.name:""} catalog={catalog} catImages={catImages} onUpdate={function(u){updateDoor(selProjId,u);}} onBack={function(){go("projectDoors");}}/>
+        <DetailView door={selDoor} carpenters={carps} isAdmin={isAdmin} empMode={isEmp} empName={user?user.name:""} projectName={selProj?selProj.name:""} catalog={catalog} catImages={catImages} onShowPlan={function(d2){var fl=doorFloor(d2);if(fl){setPlanKat(fl);setPlanFocus(d2.code);setPlanZoom(3);go("floorplan");}}} onUpdate={function(u){updateDoor(selProjId,u);}} onBack={function(){go("projectDoors");}}/>
       )}
 
       {/* ADMIN: DASHBOARD — Carpenter Performance */}
