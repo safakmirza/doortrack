@@ -945,7 +945,8 @@ export default function App(){
   var catS=useState([]);var catalog=catS[0],setCatalog=catS[1];
   var ciS=useState({});var catImages=ciS[0],setCatImages=ciS[1];
   var rS=useState(false);var ready=rS[0],setReady=rS[1];
-  var uS=useState(null);var user=uS[0],setUser=uS[1];
+  var uS=useState(function(){try{var s=localStorage.getItem("dt-user");return s?JSON.parse(s):null;}catch(e){return null;}});var user=uS[0],setUser=uS[1];
+  useEffect(function(){try{if(user)localStorage.setItem("dt-user",JSON.stringify(user));else localStorage.removeItem("dt-user");}catch(e){}},[user]);
   var vS=useState("projects");var view=vS[0],setView=vS[1];
   var spS=useState(null);var selProjId=spS[0],setSelProjId=spS[1];
   var sdS=useState(null);var selDoorId=sdS[0],setSelDoorId=sdS[1];
