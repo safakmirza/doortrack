@@ -19,8 +19,9 @@ var storage = getStorage(fbApp);
 // All possible steps
 var ALL_STEPS = [
   { id:"site_check",label:"Yer Kontrolü",group:"site" },
-  { id:"frame",label:"Kasa Taşındı & Asıldı",group:"frame" },
-  { id:"leaf",label:"Kanat Taşındı & Asıldı",group:"leaf" },
+  { id:"dist",label:"Kasa & Kanat Yerine Taşındı",group:"dist" },
+  { id:"frame",label:"Kasa Monte Edildi",group:"frame" },
+  { id:"leaf",label:"Kanat Monte Edildi",group:"leaf" },
   { id:"hw_lock",label:"Kilit / Silindir Takıldı",group:"hardware" },
   { id:"hw_handle",label:"Kol / Panik Bar Takıldı",group:"hardware" },
   { id:"hw_closer",label:"Kapı Hidroliği Takıldı",group:"hardware" },
@@ -36,8 +37,9 @@ function getStepsForDoor(door){
   items.forEach(function(h){var pfx=(h.code||"").split("-")[0];has[pfx]=true;});
   var steps=[
     {id:"site_check",label:"Yer Kontrolü",group:"site"},
-    {id:"frame",label:"Kasa Taşındı & Asıldı",group:"frame"},
-    {id:"leaf",label:"Kanat Taşındı & Asıldı",group:"leaf"}
+    {id:"dist",label:"Kasa & Kanat Yerine Taşındı",group:"dist"},
+    {id:"frame",label:"Kasa Monte Edildi",group:"frame"},
+    {id:"leaf",label:"Kanat Monte Edildi",group:"leaf"}
   ];
   if(has.LCK||has.BR||has.ESL||has.ELL||has.CYL||has.ESP)steps.push({id:"hw_lock",label:"Kilit / Silindir Takıldı",group:"hardware"});
   if(has.HDL||has.KNB)steps.push({id:"hw_handle",label:"Kol / Panik Bar Takıldı",group:"hardware"});
@@ -48,7 +50,7 @@ function getStepsForDoor(door){
   return steps;
 }
 
-var ALL_DEPS={site_check:[],frame:["site_check"],leaf:["frame"],hw_lock:["frame","leaf"],hw_handle:["frame","leaf"],hw_closer:["frame","leaf"],hw_acc:["frame","leaf"],hw_test:["frame","leaf","hw_lock","hw_handle","hw_closer","hw_acc"],final:["frame","leaf","hw_lock","hw_handle","hw_closer","hw_acc","hw_test"]};
+var ALL_DEPS={site_check:[],dist:[],frame:["site_check","dist"],leaf:["frame"],hw_lock:["frame","leaf"],hw_handle:["frame","leaf"],hw_closer:["frame","leaf"],hw_acc:["frame","leaf"],hw_test:["frame","leaf","hw_lock","hw_handle","hw_closer","hw_acc"],final:["frame","leaf","hw_lock","hw_handle","hw_closer","hw_acc","hw_test"]};
 
 function getMissingDeps(sid,steps,door){
   var doorSteps=getStepsForDoor(door);
@@ -64,7 +66,7 @@ function getMissingDeps(sid,steps,door){
 
 function getStepLabel(sid){for(var i=0;i<ALL_STEPS.length;i++){if(ALL_STEPS[i].id===sid)return ALL_STEPS[i].label;}return sid;}
 
-var GROUPS={site:"📍 Saha Kontrol",frame:"🏗 Kasa",leaf:"🚪 Kanat",hardware:"🔧 Hırdavat",final:"✅ Final"};
+var GROUPS={site:"📍 Saha Kontrol",dist:"📦 Dağıtım",frame:"🏗 Kasa",leaf:"🚪 Kanat",hardware:"🔧 Hırdavat",final:"✅ Final"};
 var STAT={not_started:{bg:"#f0f0f0",fg:"#999",lb:"Başlanmadı"},in_progress:{bg:"#e8f0fe",fg:"#e67e22",lb:"Devam Ediyor"},issue:{bg:"#fde8e8",fg:"#e74c3c",lb:"Sorun Var"},completed:{bg:"#e8f8ee",fg:"#27ae60",lb:"Tamamlandı"}};
 var REASONS=["Rutin İlerleme","Hata Düzeltme","Yeniden Montaj","Hasar Onarımı","Kalite Kontrol","Admin Düzeltme","Diğer"];
 var DEFAULT_CARPS=[{id:"carp1",name:"Ercan Usta",cid:"C-01",pin:"ercan"},{id:"carp2",name:"Ferhat Usta",cid:"C-02",pin:"ferhat"}];
@@ -82,10 +84,17 @@ var LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABBUAAAC3CAYAAABNGmbxAAAA
 
 var uid=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);};
 
+// Ağırlıklı ilerleme: Taşındı %25 → Kasa+Kanat montaj %75 → Aksesuarlar %100.
+// Test ve Son Kontrol kalite onayıdır, yüzdeyi etkilemez (aksesuarlar takılınca kapı %100 olur).
+var STEP_W={dist:25,frame:25,leaf:25,hw_lock:6.25,hw_handle:6.25,hw_closer:6.25,hw_acc:6.25,hw_test:0,final:0};
 function pct(door){
-  var doorSteps=getStepsForDoor(door).filter(function(s){return s.id!=="site_check";});var n=0;
-  doorSteps.forEach(function(s){if(door.steps&&door.steps[s.id]&&door.steps[s.id].done)n++;});
-  return doorSteps.length>0?Math.round((n/doorSteps.length)*100):0;
+  var doorSteps=getStepsForDoor(door).filter(function(s){return s.id!=="site_check";});
+  var tot=0,got=0;
+  doorSteps.forEach(function(s){
+    var w=STEP_W[s.id]!=null?STEP_W[s.id]:0;tot+=w;
+    if(door.steps&&door.steps[s.id]&&door.steps[s.id].done)got+=w;
+  });
+  return tot>0?Math.round((got/tot)*100):0;
 }
 
 function siteSt(door){var ss=(door.steps&&door.steps.site_check)||{};if(ss.siteStatus==="not_ready")return"not_ready";if(ss.siteStatus==="ready"||ss.done)return"ready";return"";}
@@ -125,6 +134,28 @@ function migrateSiteReasons(projList){
       var ss=d2.steps&&d2.steps.site_check;
       if(ss&&ss.siteStatus==="not_ready"&&(!ss.reasons||ss.reasons.length===0)){
         ss.reasons=guessReasons(ss.notes);
+        changed=true;
+      }
+    });
+    if(changed)changedIds.push(proj.id);
+  });
+  return changedIds;
+}
+
+// Geçiş: kasası veya kanadı monte edilmiş kapılarda "Yerine Taşındı" adımını otomatik işaretle
+// (taşınmadan monte edilemez; kimse geriye dönüp elle işaretlemek zorunda kalmasın)
+function migrateDistStep(projList){
+  var changedIds=[];
+  projList.forEach(function(proj){
+    var changed=false;
+    (proj.doors||[]).forEach(function(d2){
+      var st=d2.steps||{};
+      var mounted=(st.frame&&st.frame.done)||(st.leaf&&st.leaf.done);
+      if(mounted&&(!st.dist||!st.dist.done)){
+        if(!d2.steps)d2.steps={};
+        var refDate=(st.frame&&st.frame.date)||(st.leaf&&st.leaf.date)||Date.now();
+        d2.steps.dist={done:true,date:refDate,auto:true};
+        d2._ts=Date.now();
         changed=true;
       }
     });
@@ -1036,6 +1067,8 @@ export default function App(){
       var defaults=[SIGMA_PROJECT];
       defaults.forEach(function(dp){var found=false;loadedProj.forEach(function(p){if(p.id===dp.id)found=true;});if(!found)loadedProj.push(dp);});
       var migrated=migrateSiteReasons(loadedProj);
+      var migrated2=migrateDistStep(loadedProj);
+      migrated2.forEach(function(id){if(migrated.indexOf(id)<0)migrated.push(id);});
       setProjects(loadedProj);
       if(migrated.length>0){loadedProj.forEach(function(p){if(migrated.indexOf(p.id)>=0)saveProject(p);});}
       setCarps(res[1]&&res[1].length>0?res[1]:DEFAULT_CARPS);
@@ -1334,10 +1367,11 @@ export default function App(){
         <div style={{padding:16}}>
           {(function(){
             var ds=selProj.doors||[];var tot=ds.length;
-            var c={yer:0,kasa:0,kanat:0,hw:0,test:0,fin:0};
+            var c={yer:0,dag:0,kasa:0,kanat:0,hw:0,test:0,fin:0};
             ds.forEach(function(d2){
               var st=d2.steps||{};
               if(siteSt(d2)==="ready")c.yer++;
+              if(st.dist&&st.dist.done)c.dag++;
               if(st.frame&&st.frame.done)c.kasa++;
               if(st.leaf&&st.leaf.done)c.kanat++;
               var hwDone=["hw_lock","hw_handle","hw_closer","hw_acc"].some(function(k){return st[k]&&st[k].done;});
@@ -1345,7 +1379,7 @@ export default function App(){
               if(st.hw_test&&st.hw_test.done)c.test++;
               if(st.final&&st.final.done)c.fin++;
             });
-            var stages=[["📍 Yer Hazır",c.yer,"#2a7fff"],["🏗 Kasa",c.kasa,"#e67e22"],["🚪 Kanat",c.kanat,"#e67e22"],["🔧 Hırdavat",c.hw,"#9b59b6"],["🧪 Test",c.test,"#16a085"],["✅ Teslim",c.fin,"#27ae60"]];
+            var stages=[["📍 Yer Hazır",c.yer,"#2a7fff"],["📦 Dağıtım",c.dag,"#f39c12"],["🏗 Kasa",c.kasa,"#e67e22"],["🚪 Kanat",c.kanat,"#e67e22"],["🔧 Hırdavat",c.hw,"#9b59b6"],["🧪 Test",c.test,"#16a085"],["✅ Teslim",c.fin,"#27ae60"]];
             return(
               <div style={{background:"#ffffff",borderRadius:12,padding:"12px 12px 8px",marginBottom:14,border:"1px solid #e8e8e8"}}>
                 <div style={{fontSize:10,fontWeight:700,color:"#888",letterSpacing:1,marginBottom:8}}>📈 İŞ AKIŞI ({tot} KAPI)</div>
@@ -1502,7 +1536,7 @@ export default function App(){
       {/* ADMIN: REPORT */}
       {isAdmin&&view==="report"&&selProj&&(function(){
         var doors=selProj.doors||[];
-        var stepShort=[{id:"site_check",sh:"Yer"},{id:"frame",sh:"Frame"},{id:"leaf",sh:"Leaf"},{id:"hw_lock",sh:"Lock"},{id:"hw_handle",sh:"Handle"},{id:"hw_closer",sh:"Closer"},{id:"hw_acc",sh:"Accs."},{id:"hw_test",sh:"HW Test"},{id:"final",sh:"Final"}];
+        var stepShort=[{id:"site_check",sh:"Yer"},{id:"dist",sh:"Dağıtım"},{id:"frame",sh:"Frame"},{id:"leaf",sh:"Leaf"},{id:"hw_lock",sh:"Lock"},{id:"hw_handle",sh:"Handle"},{id:"hw_closer",sh:"Closer"},{id:"hw_acc",sh:"Accs."},{id:"hw_test",sh:"HW Test"},{id:"final",sh:"Final"}];
         var totalDone=0;doors.forEach(function(d2){if(stat(d2)==="completed")totalDone++;});
         var overallPct=doors.length>0?Math.round(doors.reduce(function(a,d2){return a+pct(d2);},0)/doors.length):0;
         function getCarpName(id){if(!id)return"—";var f="—";carps.forEach(function(c){if(c.id===id)f=c.name;});return f;}
