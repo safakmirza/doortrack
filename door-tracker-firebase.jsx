@@ -686,7 +686,30 @@ var DEFAULT_CAT_IMAGES={
 function fmtD(ts){if(!ts)return"";var d=new Date(ts);return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});}
 async function sGet(k){try{var snap=await getDoc(doc(db,"appData",k));if(snap.exists()){return JSON.parse(snap.data().value);}return null;}catch(e){console.error("sGet",k,e);return null;}}
 async function sSet(k,v){try{await setDoc(doc(db,"appData",k),{value:JSON.stringify(v),updatedAt:Date.now()});}catch(e){console.error("sSet",k,e);}}
-async function saveProject(proj){try{await setDoc(doc(db,"projects",proj.id),{value:JSON.stringify(proj),updatedAt:Date.now()});}catch(e){console.error("saveProject",proj.id,e);}}
+// Kapı bazında birleştirme: aynı projeye birden çok cihaz yazsa da kimse kimsenin işini ezmez.
+// Her kapının _ts damgası var; yeni damgalı kazanır. del{} haritası silinen kapıların geri dirilmesini önler.
+function mergeDoors(remote,local){
+  var delMap=Object.assign({},remote.del||{},local.del||{});
+  var map={};
+  (remote.doors||[]).forEach(function(d){map[d.id]=d;});
+  (local.doors||[]).forEach(function(d){var r=map[d.id];if(!r||((d._ts||0)>=(r._ts||0)))map[d.id]=d;});
+  var doors=[];var seen={};
+  function take(d){if(seen[d.id])return;seen[d.id]=1;var m=map[d.id];if(delMap[d.id]&&delMap[d.id]>=(m._ts||0))return;doors.push(m);}
+  (local.doors||[]).forEach(take);
+  (remote.doors||[]).forEach(take);
+  return Object.assign({},local,{doors:doors,del:delMap});
+}
+async function saveProject(proj){
+  try{
+    var ref=doc(db,"projects",proj.id);
+    var merged=proj;
+    try{
+      var snap=await getDoc(ref);
+      if(snap.exists()){var remote=JSON.parse(snap.data().value);merged=mergeDoors(remote,proj);}
+    }catch(e){}
+    await setDoc(ref,{value:JSON.stringify(merged),updatedAt:Date.now()});
+  }catch(e){console.error("saveProject",proj.id,e);}
+}
 async function loadProjects(){try{var snap=await getDoc(doc(db,"appData","dtv7-projIndex"));var index=snap.exists()?JSON.parse(snap.data().value):[];if(index.length===0)return null;var all=[];for(var i=0;i<index.length;i++){var ps=await getDoc(doc(db,"projects",index[i]));if(ps.exists()){try{all.push(JSON.parse(ps.data().value));}catch(e){}}}return all.length>0?all:null;}catch(e){console.error("loadProjects",e);return null;}}
 async function saveProjectIndex(projects){var ids=projects.map(function(p){return p.id;});await sSet("dtv7-projIndex",ids);}
 
@@ -965,6 +988,8 @@ export default function App(){
   var catImgRef=useRef(null);
   var catImgTargetRef=useRef("");
   var remoteUpdate=useRef(false);
+  var lastSavedRef=useRef({});
+  var subscribedRef=useRef({});
   var listScrollRef=useRef(0);
   var empsS=useState([]);var emps=empsS[0],setEmps=empsS[1];
   var sfS=useState("all");var siteFilter=sfS[0],setSiteFilter=sfS[1];
@@ -977,6 +1002,34 @@ export default function App(){
   var planUpRef=useRef(null);
 
   useEffect(function(){
+    var unsubs=[];
+    // Canlı senkron: başka cihazın yazdığı proje geldiğinde kapı bazında birleştir (yereldeki yeni işler korunur)
+    function applyRemoteProject(remote){
+      if(!remote||!remote.id)return;
+      setProjects(function(prev){
+        var found=false;var changed=false;
+        var next=prev.map(function(p){
+          if(p.id!==remote.id)return p;
+          found=true;
+          var merged=mergeDoors(remote,p);
+          if(JSON.stringify(merged)===JSON.stringify(p))return p;
+          changed=true;return merged;
+        });
+        if(!found){lastSavedRef.current[remote.id]=JSON.stringify(remote);next=prev.concat([remote]);changed=true;}
+        return changed?next:prev;
+      });
+    }
+    function subscribeProj(id){
+      if(subscribedRef.current[id])return;
+      subscribedRef.current[id]=1;
+      try{
+        unsubs.push(onSnapshot(doc(db,"projects",id),function(snap){
+          if(!snap.exists()||snap.metadata.hasPendingWrites)return;
+          var remote;try{remote=JSON.parse(snap.data().value);}catch(e){return;}
+          applyRemoteProject(remote);
+        }));
+      }catch(e){console.error("subscribe",id,e);}
+    }
     Promise.all([loadProjects(),sGet("dtv7-carp"),sGet("dtv7-cat"),sGet("dtv7-cimg"),sGet("dtv7-prices"),sGet("dtv7-emp"),sGet("dtv7-plans")]).then(function(res){
       remoteUpdate.current=true;
       var loadedProj=res[0]&&res[0].length>0?res[0]:[SIGMA_PROJECT];
@@ -993,12 +1046,30 @@ export default function App(){
       setPlanUrls(res[6]&&typeof res[6]==="object"?res[6]:{});
       setReady(true);
       setTimeout(function(){remoteUpdate.current=false;},500);
+      // yüklenenleri "kaydedilmiş" say ve canlı dinlemeye başla
+      loadedProj.forEach(function(p){lastSavedRef.current[p.id]=JSON.stringify(p);subscribeProj(p.id);});
+      lastSavedRef.current.__idx=loadedProj.map(function(p){return p.id;}).join(",");
+      // proje listesi aboneliği: başka cihazda yeni proje açılırsa burada da belirsin
+      try{
+        unsubs.push(onSnapshot(doc(db,"appData","dtv7-projIndex"),function(snap){
+          if(!snap.exists()||snap.metadata.hasPendingWrites)return;
+          var ids;try{ids=JSON.parse(snap.data().value);}catch(e){return;}
+          (ids||[]).forEach(function(id){subscribeProj(id);});
+        }));
+      }catch(e){}
     });
-    var unsubs=[];
     return function(){unsubs.forEach(function(u){u();});};
   },[]);
 
-  useEffect(function(){if(ready&&!remoteUpdate.current){saveProjectIndex(projects);projects.forEach(function(p){saveProject(p);});}},[projects,ready]);
+  useEffect(function(){
+    if(!ready||remoteUpdate.current)return;
+    var ids=projects.map(function(p){return p.id;}).join(",");
+    if(lastSavedRef.current.__idx!==ids){lastSavedRef.current.__idx=ids;saveProjectIndex(projects);}
+    projects.forEach(function(p){
+      var j=JSON.stringify(p);
+      if(lastSavedRef.current[p.id]!==j){lastSavedRef.current[p.id]=j;saveProject(p);}
+    });
+  },[projects,ready]);
   useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-carp",carps);},[carps,ready]);
   useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-cat",catalog);},[catalog,ready]);
   useEffect(function(){if(ready&&!remoteUpdate.current)sSet("dtv7-emp",emps);},[emps,ready]);
@@ -1030,7 +1101,7 @@ export default function App(){
                   }else steps2[k]=st;
                 });
                 if(!stepsChanged)return d2;
-                changed=true;return Object.assign({},d2,{steps:steps2});
+                changed=true;return Object.assign({},d2,{steps:steps2,_ts:Date.now()});
               });
               return Object.assign({},proj,{doors:doors2});
             });
@@ -1079,7 +1150,7 @@ export default function App(){
 
   function bulkAssign(doorIds,carpId){
     setProjects(function(prev){
-      var next=prev.map(function(proj){if(proj.id!==selProjId)return proj;return Object.assign({},proj,{doors:(proj.doors||[]).map(function(d){var found=false;for(var i=0;i<doorIds.length;i++){if(doorIds[i]===d.id)found=true;}return found?Object.assign({},d,{assignedTo:carpId}):d;})});});
+      var next=prev.map(function(proj){if(proj.id!==selProjId)return proj;return Object.assign({},proj,{doors:(proj.doors||[]).map(function(d){var found=false;for(var i=0;i<doorIds.length;i++){if(doorIds[i]===d.id)found=true;}return found?Object.assign({},d,{assignedTo:carpId,_ts:Date.now()}):d;})});});
       return next;
     });
     showToast(true,doorIds.length+" door"+(doorIds.length>1?"s":"")+(carpId?" atandı!":" atama kaldırıldı!"));
@@ -1098,11 +1169,12 @@ export default function App(){
   }
 
   function updateDoor(projectId,updated){
+    updated=Object.assign({},updated,{_ts:Date.now()});
     setProjects(function(prev){var next=prev.map(function(proj){if(proj.id!==projectId)return proj;return Object.assign({},proj,{doors:(proj.doors||[]).map(function(d){return d.id===updated.id?updated:d;})});});return next;});
   }
 
   function deleteDoor(projectId,doorId){
-    setProjects(function(prev){var next=prev.map(function(proj){if(proj.id!==projectId)return proj;return Object.assign({},proj,{doors:(proj.doors||[]).filter(function(d){return d.id!==doorId;})});});return next;});
+    setProjects(function(prev){var next=prev.map(function(proj){if(proj.id!==projectId)return proj;var dm=Object.assign({},proj.del||{});dm[doorId]=Date.now();return Object.assign({},proj,{doors:(proj.doors||[]).filter(function(d){return d.id!==doorId;}),del:dm});});return next;});
   }
 
   function handleImport(e){
@@ -1113,6 +1185,7 @@ export default function App(){
         var proj=null;projects.forEach(function(p){if(p.id===selProjId)proj=p;});
         var result=parseXL(ev.target.result,(proj&&proj.doors)||[]);
         if(result.imported.length>0){
+          var _its=Date.now();result.imported.forEach(function(d){d._ts=_its;});
           setProjects(function(prev){var next=prev.map(function(p){if(p.id!==selProjId)return p;return Object.assign({},p,{doors:result.imported.concat(p.doors||[])});});return next;});
         }
         showToast(true,result.imported.length+" door"+(result.imported.length!==1?"s":"")+" içe aktarıldı!"+(result.skipped.length>0?" ("+result.skipped.length+" skipped)":""));
@@ -1202,7 +1275,7 @@ export default function App(){
                     <button onClick={function(){go("qrLabels");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🏷 QR Etiketleri</button>
                     <button onClick={function(){var data={"dtv7-proj":JSON.stringify(projects),"dtv7-carp":JSON.stringify(carps),"dtv7-cat":JSON.stringify(catalog),"dtv7-cimg":JSON.stringify(catImages),"dtv7-prices":JSON.stringify(prices),"dtv7-emp":JSON.stringify(emps),"dtv7-plans":JSON.stringify(planUrls)};var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
                     <button onClick={function(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(ev){try{var data=JSON.parse(ev.target.result);var keys=Object.keys(data);var promises=keys.map(function(k){return sSet(k,JSON.parse(data[k]));});Promise.all(promises).then(function(){window.location.reload();});}catch(err){alert("Hatalı dosya");}};rd.readAsText(f);};inp.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#2a7fff",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Veri Geri Yükle</button>
-                    <button onClick={function(){if(window.confirm("Tüm kapılar silinsin mi?")){setProjects(function(p){var next=p.map(function(proj){if(proj.id!==selProjId)return proj;return Object.assign({},proj,{doors:[]});});return next;});setMenuOpen(false);}}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",color:"#e74c3c",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗑 Kapıları Temizle</button>
+                    <button onClick={function(){if(window.confirm("Tüm kapılar silinsin mi?")){setProjects(function(p){var next=p.map(function(proj){if(proj.id!==selProjId)return proj;var dm=Object.assign({},proj.del||{});var ts=Date.now();(proj.doors||[]).forEach(function(d){dm[d.id]=ts;});return Object.assign({},proj,{doors:[],del:dm});});return next;});setMenuOpen(false);}}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",color:"#e74c3c",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗑 Kapıları Temizle</button>
                   </div>
                 </div>)}
               </div>
