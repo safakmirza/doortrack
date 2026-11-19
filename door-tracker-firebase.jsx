@@ -1691,8 +1691,58 @@ export default function App(){
           XLSX.writeFile(wb2,selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Report.xlsx");
         }
         function exportPhotoHTML(){
-          var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>@media print{.door{page-break-inside:avoid;}}body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;margin-bottom:4px;}.subtitle{color:#888;font-size:13px;margin-bottom:20px;}.door{background:#fff;border-radius:12px;padding:16px;margin:14px 0;border:1px solid #e8e8e8;}.doorhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e67e22;padding-bottom:8px;margin-bottom:8px;}.doorhead h2{color:#333;margin:0;font-size:18px;}.progress{font-size:20px;font-weight:bold;}.p100{color:#27ae60;}.p50{color:#e67e22;}.p0{color:#aaa;}.meta{color:#666;font-size:12px;margin:2px 0;}.stepbox{background:#fef9f4;border-left:3px solid #e67e22;padding:8px 12px;margin:10px 0;border-radius:0 8px 8px 0;}.stepname{font-weight:bold;color:#333;font-size:13px;}.stepdate{color:#888;font-size:11px;}.stepnote{color:#555;font-size:12px;font-style:italic;margin-top:2px;}.status-ready{color:#27ae60;font-weight:bold;}.status-notready{color:#e74c3c;font-weight:bold;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;}.phbox{width:172px;}img{width:172px;height:129px;object-fit:cover;border-radius:8px;border:1px solid #ddd;display:block;}.badge{display:inline-block;font-size:12px;font-weight:bold;padding:4px 12px;border-radius:14px;margin-bottom:8px;color:#fff;}.b-done{background:#27ae60;}.b-acc{background:#9b59b6;}.b-prog{background:#2a7fff;}.b-ready{background:#16a085;}.b-nr{background:#e74c3c;}.b-none{background:#95a5a6;}.chips{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 2px;}.chip{border-radius:8px;padding:4px 9px;text-align:center;min-width:52px;}.ch-l{font-size:10px;font-weight:bold;}.ch-s{font-size:10px;margin-top:1px;}.ch-done{background:#eafaf0;border:1px solid #27ae60;color:#1d8a4a;}.ch-no{background:#f2f3f4;border:1px solid #d5d8da;color:#95a0a6;}.ch-bad{background:#fdeeec;border:1px solid #e74c3c;color:#c0392b;}</style></head><body>";
+          var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>@media print{.door{page-break-inside:avoid;}}body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;margin-bottom:4px;}.subtitle{color:#888;font-size:13px;margin-bottom:20px;}.door{background:#fff;border-radius:12px;padding:16px;margin:14px 0;border:1px solid #e8e8e8;}.doorhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e67e22;padding-bottom:8px;margin-bottom:8px;}.doorhead h2{color:#333;margin:0;font-size:18px;}.progress{font-size:20px;font-weight:bold;}.p100{color:#27ae60;}.p50{color:#e67e22;}.p0{color:#aaa;}.meta{color:#666;font-size:12px;margin:2px 0;}.stepbox{background:#fef9f4;border-left:3px solid #e67e22;padding:8px 12px;margin:10px 0;border-radius:0 8px 8px 0;}.stepname{font-weight:bold;color:#333;font-size:13px;}.stepdate{color:#888;font-size:11px;}.stepnote{color:#555;font-size:12px;font-style:italic;margin-top:2px;}.status-ready{color:#27ae60;font-weight:bold;}.status-notready{color:#e74c3c;font-weight:bold;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;}.phbox{width:172px;}img{width:172px;height:129px;object-fit:cover;border-radius:8px;border:1px solid #ddd;display:block;}.badge{display:inline-block;font-size:12px;font-weight:bold;padding:4px 12px;border-radius:14px;margin-bottom:8px;color:#fff;}.b-done{background:#27ae60;}.b-acc{background:#9b59b6;}.b-prog{background:#2a7fff;}.b-ready{background:#16a085;}.b-nr{background:#e74c3c;}.b-none{background:#95a5a6;}.chips{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 2px;}.chip{border-radius:8px;padding:4px 9px;text-align:center;min-width:52px;}.ch-l{font-size:10px;font-weight:bold;}.ch-s{font-size:10px;margin-top:1px;}.ch-done{background:#eafaf0;border:1px solid #27ae60;color:#1d8a4a;}.ch-no{background:#f2f3f4;border:1px solid #d5d8da;color:#95a0a6;}.ch-bad{background:#fdeeec;border:1px solid #e74c3c;color:#c0392b;}.sumbox{background:#fff;border:2px solid #e67e22;border-radius:12px;padding:16px;margin-bottom:20px;}@media print{.sumbox{page-break-after:always;}}.sumtitle{font-size:15px;font-weight:bold;color:#e67e22;margin-bottom:10px;}.sumtitle2{font-size:13px;font-weight:bold;color:#333;margin:14px 0 4px;}.sumtitle2.red{color:#c0392b;}.stats{display:flex;flex-wrap:wrap;gap:8px;}.stt{flex:1;min-width:100px;background:#fef5eb;border-radius:8px;padding:9px 6px;text-align:center;font-size:11px;color:#666;}.stt b{display:block;font-size:21px;color:#333;margin-bottom:2px;}table.t{width:100%;border-collapse:collapse;font-size:12px;}.t th{background:#f4e8d8;text-align:left;padding:5px 8px;font-size:11px;}.t td{border-top:1px solid #eee;padding:5px 8px;vertical-align:top;}</style></head><body>";
           html+="<h1>"+selProj.name+"</h1><div class='subtitle'>Fotoğraflı İlerleme Raporu · "+new Date().toLocaleDateString("tr-TR")+" "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
+          // ÜST ÖZET — işverene dönük: genel durum + hazır olmayanların kat bazında dökümü
+          (function(){
+            var HWL={hw_lock:"Kilit",hw_handle:"Kol/Panikbar",hw_closer:"Hidrolik",hw_acc:"Aksesuar"};
+            var sm={tot:doors.length,done:0,acc:0,ready:0,nr:0},pctSum=0;
+            var nrByKat={},rdByKat={},accByKat={};
+            doors.forEach(function(d2){
+              var st=d2.steps||{};var p=pct(d2);pctSum+=p;
+              var fl=(st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done);
+              var sst=siteSt(d2);var kat=d2.mahal||"—";
+              if(p===100)sm.done++;
+              else if(fl){
+                sm.acc++;var miss=[];
+                getStepsForDoor(d2).forEach(function(s2){if(HWL[s2.id]&&!(st[s2.id]&&st[s2.id].done))miss.push(HWL[s2.id]);});
+                if(!accByKat[kat])accByKat[kat]=[];
+                accByKat[kat].push("#"+d2.code+(miss.length?" ("+miss.join(", ")+")":""));
+              }
+              if(sst==="not_ready"){
+                sm.nr++;
+                var sc=st.site_check||{};
+                var rr=(sc.reasons||[]).map(reasonLabel).join(", ");
+                var nt=sc.notes?" — <i>"+sc.notes+"</i>":"";
+                if(!nrByKat[kat])nrByKat[kat]=[];
+                nrByKat[kat].push("<b>#"+d2.code+"</b>"+(rr?" ("+rr+")":"")+nt);
+              }else if(sst==="ready"&&!(st.frame&&st.frame.done)){
+                sm.ready++;
+                if(!rdByKat[kat])rdByKat[kat]=[];
+                rdByKat[kat].push("#"+d2.code);
+              }
+            });
+            var avg=sm.tot>0?Math.round(pctSum/sm.tot):0;
+            html+="<div class='sumbox'>";
+            html+="<div class='sumtitle'>📊 GENEL DURUM ÖZETİ</div><div class='stats'>";
+            html+="<div class='stt'><b>"+sm.tot+"</b>Toplam Kapı</div>";
+            html+="<div class='stt' style='background:#eafaf0'><b style='color:#27ae60'>"+sm.done+"</b>Tamamlanan (%100)</div>";
+            html+="<div class='stt' style='background:#f5eefa'><b style='color:#9b59b6'>"+sm.acc+"</b>Sadece Aksesuar Eksik</div>";
+            html+="<div class='stt' style='background:#e8f7f3'><b style='color:#16a085'>"+sm.ready+"</b>Montaja Hazır Bekleyen</div>";
+            html+="<div class='stt' style='background:#fdeeec'><b style='color:#e74c3c'>"+sm.nr+"</b>Yeri Hazır Değil</div>";
+            html+="<div class='stt'><b style='color:#e67e22'>%"+avg+"</b>Ortalama İlerleme</div>";
+            html+="</div>";
+            function katTable(title,map,cls){
+              var keys=Object.keys(map);if(keys.length===0)return;
+              html+="<div class='sumtitle2 "+(cls||"")+"'>"+title+"</div><table class='t'><tr><th style='width:160px'>Bölge / Kat</th><th style='width:46px'>Adet</th><th>Kapılar</th></tr>";
+              keys.sort().forEach(function(k){html+="<tr><td>"+k+"</td><td>"+map[k].length+"</td><td>"+map[k].join(" · ")+"</td></tr>";});
+              html+="</table>";
+            }
+            katTable("⛔ YERİ HAZIR OLMAYAN KAPILAR — KAT BAZINDA ("+sm.nr+" adet)",nrByKat,"red");
+            katTable("🔧 KASA+KANAT MONTE — SADECE AKSESUAR EKSİK ("+sm.acc+" adet)",accByKat,"");
+            katTable("📦 MONTAJA HAZIR, MONTAJ BEKLEYEN ("+sm.ready+" adet)",rdByKat,"");
+            html+="</div>";
+          })();
           var hasAny=false;
           var SHORTL={site_check:"Yer",dist:"Dağıtım",frame:"Kasa",leaf:"Kanat",hw_lock:"Kilit",hw_handle:"Kol",hw_closer:"Hidrolik",hw_acc:"Aksesuar",hw_test:"Test",final:"Son Kontrol"};
           doors.forEach(function(d2){
