@@ -110,6 +110,14 @@ var SITE_REASONS=[
 var PLAN_COORDS={"KAT 10":{"7":{"x":13.5,"y":59.78},"3":{"x":4.89,"y":62.1},"2":{"x":4.75,"y":63.61},"1":{"x":3.13,"y":62.6},"11":{"x":41.25,"y":59.71},"10":{"x":32.55,"y":59.86},"9":{"x":26.67,"y":60.08},"5":{"x":5.76,"y":59.67},"6":{"x":7.12,"y":61.74},"40":{"x":94.22,"y":26.04},"8":{"x":22.74,"y":59.82},"14":{"x":26.11,"y":75.3},"17":{"x":40.43,"y":74.92},"20":{"x":51.66,"y":76.79},"15":{"x":25.91,"y":74.19},"18":{"x":40.22,"y":73.66},"24":{"x":94.23,"y":73.52},"21":{"x":50.54,"y":73.57},"23":{"x":90.14,"y":72.85},"13":{"x":5.68,"y":72.86},"25":{"x":94.29,"y":72.82},"16":{"x":25.78,"y":72.93},"19":{"x":40.2,"y":73.11},"22":{"x":50.87,"y":73.16},"26":{"x":92.18,"y":72.13},"27":{"x":92.91,"y":71.13},"28":{"x":88.86,"y":68.72},"29":{"x":92.58,"y":68.04},"12A":{"x":48.34,"y":60.2},"42":{"x":68.01,"y":59.65},"30":{"x":89.87,"y":61.7},"4":{"x":5.42,"y":60.6},"12":{"x":48.58,"y":59.72},"43":{"x":67.67,"y":59.35},"31":{"x":90.28,"y":60.71},"12B":{"x":59.04,"y":58.05},"43A":{"x":71.14,"y":54.84},"44":{"x":67.9,"y":54.83},"32":{"x":92.86,"y":47.71},"33":{"x":93.74,"y":45.57},"34":{"x":92.75,"y":44.37},"35":{"x":92.5,"y":42.85},"45":{"x":67.05,"y":36.78},"36":{"x":92.64,"y":37.84},"46":{"x":67.33,"y":34.93},"37":{"x":92.96,"y":31.78},"38":{"x":92.96,"y":27.77},"39":{"x":91.9,"y":27.09},"61":{"x":53.82,"y":24.96},"59":{"x":56.47,"y":26.25},"53":{"x":60.15,"y":26.13},"52":{"x":61.96,"y":24.93},"48":{"x":66.64,"y":26.41},"47":{"x":70.04,"y":25.22},"63":{"x":44.32,"y":24.3},"56":{"x":58.41,"y":24.79},"41":{"x":92.12,"y":25.22},"62":{"x":51.77,"y":24.92},"50":{"x":64.32,"y":23.97},"64":{"x":44.73,"y":22.23},"60":{"x":54.82,"y":23.86},"58":{"x":57.06,"y":23.46},"54":{"x":59.95,"y":22.19},"49":{"x":67.26,"y":23.53},"51":{"x":63.97,"y":24.92},"65":{"x":45.82,"y":21.4},"57":{"x":58.61,"y":23.28},"55":{"x":61.04,"y":21.51}},"KAT 11":{"75":{"x":25.85,"y":71.5},"77":{"x":41.43,"y":72.81},"82":{"x":50.73,"y":73.16},"79":{"x":48.43,"y":70.94},"84":{"x":93.04,"y":70.68},"74":{"x":26.23,"y":71.21},"76":{"x":42.11,"y":70.5},"78":{"x":48.21,"y":73.45},"80":{"x":49.24,"y":69.86},"81":{"x":50.44,"y":71.29},"83":{"x":89.92,"y":71.08},"85":{"x":92.45,"y":68.77},"66":{"x":4.58,"y":61.7},"67":{"x":4.61,"y":60.17},"70":{"x":26.2,"y":57.25},"86":{"x":68.57,"y":58.86},"68":{"x":6.42,"y":56.79},"69":{"x":18.84,"y":56.46},"71":{"x":29.73,"y":56.44},"72":{"x":37.54,"y":56.44},"73":{"x":50.14,"y":56.47},"87":{"x":68.09,"y":57.0},"88":{"x":68.71,"y":53.04},"92":{"x":44.34,"y":20.57},"90":{"x":58.7,"y":22.09},"89":{"x":62.91,"y":22.03},"93":{"x":45.02,"y":19.98},"91":{"x":60.18,"y":19.92}},"KAT 12":{"97":{"x":25.77,"y":71.83},"99":{"x":41.08,"y":73.21},"104":{"x":50.48,"y":72.2},"100":{"x":46.55,"y":71.41},"101":{"x":48.8,"y":71.36},"107":{"x":93.49,"y":71.03},"96":{"x":26.16,"y":71.46},"98":{"x":41.9,"y":70.51},"102":{"x":49.13,"y":70.98},"103":{"x":50.96,"y":71.68},"105":{"x":90.41,"y":71.34},"106":{"x":92.92,"y":70.21},"94":{"x":4.4,"y":60.5},"95":{"x":5.08,"y":58.96},"108":{"x":67.29,"y":56.27},"109":{"x":66.9,"y":56.28},"110":{"x":68.15,"y":52.97},"111":{"x":62.54,"y":21.23},"115":{"x":44.42,"y":20.52},"112":{"x":59.46,"y":20.91},"113":{"x":59.9,"y":20.46},"117":{"x":39.41,"y":19.72},"116":{"x":45.14,"y":19.98},"114":{"x":60.39,"y":19.96}},"KAT 20":{"129":{"x":26.86,"y":73.39},"131":{"x":41.41,"y":73.59},"136":{"x":50.76,"y":72.05},"132":{"x":46.8,"y":71.51},"128":{"x":27.37,"y":70.77},"130":{"x":42.61,"y":71.05},"133":{"x":48.71,"y":71.07},"134":{"x":49.02,"y":71.4},"135":{"x":52.23,"y":70.76},"137":{"x":90.31,"y":71.62},"139":{"x":94.78,"y":71.62},"138":{"x":92.87,"y":70.15},"118":{"x":4.78,"y":60.34},"119":{"x":5.29,"y":60.46},"126":{"x":48.93,"y":59.81},"145":{"x":66.22,"y":59.94},"147":{"x":69.57,"y":59.34},"121":{"x":15.49,"y":57.08},"146":{"x":66.33,"y":57.39},"148":{"x":68.06,"y":57.51},"140":{"x":93.03,"y":43.97},"142":{"x":93.59,"y":43.24},"141":{"x":93.09,"y":43.3},"150":{"x":67.06,"y":35.82},"151":{"x":66.66,"y":34.18},"143":{"x":92.61,"y":24.79},"152":{"x":67.32,"y":23.52},"144":{"x":93.42,"y":24.55},"154":{"x":65.6,"y":22.23},"159":{"x":45.17,"y":22.2},"157":{"x":60.03,"y":20.94},"156":{"x":61.04,"y":22.08},"160":{"x":40.32,"y":21.31},"153":{"x":67.51,"y":22.23},"158":{"x":46.42,"y":19.55},"155":{"x":61.56,"y":19.47},"127":{"x":54.21,"y":57.26},"149":{"x":69.42,"y":52.22},"122":{"x":24.5,"y":58.14},"123":{"x":27.14,"y":58.47},"124":{"x":31.11,"y":58.35},"125":{"x":41.01,"y":57.28},"120":{"x":5.35,"y":59.41}},"KAT 21":{"170":{"x":25.83,"y":71.76},"172":{"x":41.55,"y":71.84},"177":{"x":50.72,"y":71.86},"174":{"x":49.45,"y":71.02},"180":{"x":94.35,"y":71.84},"169":{"x":27.59,"y":70.81},"171":{"x":41.63,"y":71.17},"173":{"x":48.24,"y":71.03},"175":{"x":48.46,"y":73.32},"176":{"x":51.23,"y":71.36},"178":{"x":90.59,"y":71.23},"179":{"x":93.17,"y":70.0},"161":{"x":4.51,"y":60.99},"162":{"x":4.85,"y":59.82},"187":{"x":68.41,"y":57.15},"163":{"x":5.25,"y":58.64},"164":{"x":18.8,"y":56.42},"165":{"x":26.8,"y":56.34},"166":{"x":29.92,"y":56.33},"167":{"x":37.82,"y":56.38},"168":{"x":50.21,"y":56.41},"182":{"x":93.5,"y":43.05},"181":{"x":92.81,"y":42.1},"183":{"x":93.2,"y":28.35},"184":{"x":93.09,"y":24.58},"185":{"x":94.56,"y":22.76},"188":{"x":63.0,"y":21.81},"193":{"x":45.03,"y":19.89},"191":{"x":59.38,"y":20.43},"190":{"x":60.79,"y":21.22},"194":{"x":39.59,"y":19.38},"192":{"x":45.47,"y":19.48},"189":{"x":61.6,"y":18.69},"186":{"x":70.3,"y":56.81}},"KAT 22":{"197":{"x":25.76,"y":71.77},"199":{"x":41.72,"y":73.04},"205":{"x":50.58,"y":71.73},"202":{"x":48.9,"y":70.92},"208":{"x":90.34,"y":70.96},"198":{"x":27.23,"y":70.34},"200":{"x":41.5,"y":71.09},"201":{"x":46.65,"y":70.8},"203":{"x":50.43,"y":71.11},"204":{"x":51.08,"y":71.21},"206":{"x":90.83,"y":70.06},"207":{"x":92.8,"y":69.49},"195":{"x":4.98,"y":61.68},"196":{"x":5.77,"y":58.68},"217":{"x":69.63,"y":54.46},"218":{"x":68.2,"y":57.12},"218A":{"x":68.29,"y":52.6},"209":{"x":94.1,"y":44.43},"210":{"x":93.15,"y":42.66},"213":{"x":88.04,"y":28.81},"215":{"x":92.08,"y":23.72},"222":{"x":44.57,"y":20.42},"220":{"x":61.43,"y":21.34},"219":{"x":63.58,"y":22.02},"224":{"x":39.5,"y":19.46},"223":{"x":45.19,"y":19.7},"221":{"x":62.41,"y":21.04},"216":{"x":93.14,"y":23.93},"212":{"x":87.59,"y":29.58},"211":{"x":87.88,"y":29.33},"214":{"x":91.06,"y":25.53}},"KAT 30":{"238":{"x":26.76,"y":79.57},"239":{"x":42.04,"y":79.54},"245":{"x":51.67,"y":79.52},"242":{"x":48.95,"y":77.48},"237":{"x":25.77,"y":78.4},"250":{"x":94.59,"y":77.36},"240":{"x":41.22,"y":78.13},"241":{"x":46.7,"y":77.5},"243":{"x":49.25,"y":77.1},"244":{"x":50.81,"y":78.04},"248":{"x":90.39,"y":77.39},"249":{"x":93.13,"y":75.5},"247":{"x":65.0,"y":74.02},"225":{"x":4.66,"y":66.41},"226":{"x":6.21,"y":66.55},"256":{"x":65.46,"y":65.91},"227":{"x":6.21,"y":64.07},"258":{"x":69.47,"y":64.53},"228":{"x":15.62,"y":63.3},"229":{"x":24.3,"y":64.04},"232":{"x":30.96,"y":63.31},"233":{"x":40.43,"y":64.08},"236":{"x":49.68,"y":63.79},"259":{"x":67.9,"y":63.29},"260":{"x":69.39,"y":61.38},"261":{"x":68.34,"y":58.88},"251":{"x":94.38,"y":48.88},"252":{"x":92.94,"y":48.66},"262":{"x":66.63,"y":42.05},"263":{"x":67.55,"y":39.14},"253":{"x":93.04,"y":32.55},"254":{"x":94.27,"y":31.51},"271":{"x":44.47,"y":28.66},"269":{"x":60.55,"y":27.95},"265":{"x":65.31,"y":28.39},"255":{"x":94.04,"y":28.26},"278":{"x":39.76,"y":29.22},"276":{"x":42.32,"y":25.94},"272":{"x":44.78,"y":26.85},"270":{"x":53.93,"y":25.57},"267":{"x":61.08,"y":26.5},"266":{"x":62.83,"y":26.46},"279":{"x":37.79,"y":25.51},"277":{"x":36.09,"y":26.89},"275":{"x":42.97,"y":25.07},"273":{"x":44.76,"y":25.56},"268":{"x":60.88,"y":24.5},"264":{"x":65.85,"y":24.78},"279A":{"x":31.66,"y":22.47},"278A":{"x":28.92,"y":19.66},"277A":{"x":33.16,"y":15.58},"276A":{"x":33.14,"y":15.13},"275A":{"x":31.1,"y":12.88},"273A":{"x":32.83,"y":14.25},"280A":{"x":56.98,"y":13.15},"280":{"x":67.71,"y":11.85},"281":{"x":69.05,"y":11.77},"280B":{"x":30.55,"y":8.67},"234":{"x":41.06,"y":63.76},"246":{"x":63.89,"y":74.48},"257":{"x":68.94,"y":62.37},"230":{"x":26.98,"y":68.18},"231":{"x":26.95,"y":64.54},"235":{"x":48.68,"y":64.49},"274":{"x":42.91,"y":25.48}},"KAT 31":{"290":{"x":25.95,"y":79.48},"292":{"x":41.38,"y":79.49},"298":{"x":50.51,"y":79.5},"295":{"x":48.38,"y":78.7},"291":{"x":26.46,"y":77.45},"293":{"x":40.9,"y":77.51},"297":{"x":51.36,"y":76.8},"294":{"x":48.09,"y":77.3},"296":{"x":49.27,"y":76.42},"299":{"x":94.06,"y":75.99},"282":{"x":4.28,"y":68.34},"302":{"x":68.1,"y":64.18},"284":{"x":5.44,"y":66.89},"285":{"x":19.01,"y":62.95},"286":{"x":26.37,"y":62.85},"287":{"x":27.37,"y":62.87},"288":{"x":36.37,"y":62.8},"289":{"x":49.85,"y":62.86},"303":{"x":67.67,"y":63.66},"304":{"x":65.72,"y":40.76},"305":{"x":66.29,"y":39.13},"301":{"x":92.29,"y":31.24},"306":{"x":66.97,"y":27.7},"308":{"x":59.83,"y":26.62},"310":{"x":56.24,"y":26.47},"307":{"x":67.33,"y":27.22},"309":{"x":61.24,"y":25.34},"311":{"x":67.74,"y":11.85},"300":{"x":92.98,"y":30.56},"283":{"x":4.37,"y":66.64}},"KAT 32":{"314":{"x":25.54,"y":77.99},"316":{"x":40.92,"y":78.04},"322":{"x":50.61,"y":77.7},"318":{"x":46.54,"y":77.16},"319":{"x":48.37,"y":77.13},"315":{"x":26.02,"y":77.45},"317":{"x":41.29,"y":77.13},"321":{"x":51.0,"y":77.3},"320":{"x":49.25,"y":77.13},"323":{"x":93.51,"y":76.74},"312":{"x":4.42,"y":66.32},"313":{"x":4.78,"y":65.83},"330":{"x":68.31,"y":63.93},"331":{"x":68.06,"y":63.35},"332":{"x":66.71,"y":41.45},"333":{"x":66.12,"y":40.31},"324":{"x":89.5,"y":35.61},"325":{"x":87.94,"y":35.41},"326":{"x":89.52,"y":34.81},"327":{"x":91.04,"y":30.98},"328":{"x":92.46,"y":31.17},"334":{"x":67.74,"y":28.85},"329":{"x":94.46,"y":29.06},"336":{"x":59.59,"y":26.8},"335":{"x":68.49,"y":26.61},"337":{"x":60.31,"y":25.74}},"KAT 33":{"352":{"x":90.84,"y":80.56},"353":{"x":92.77,"y":80.36},"340":{"x":25.78,"y":78.02},"342":{"x":41.03,"y":78.03},"349":{"x":51.47,"y":79.15},"345":{"x":48.17,"y":78.74},"351":{"x":91.6,"y":80.03},"354":{"x":93.06,"y":78.23},"341":{"x":26.17,"y":76.91},"343":{"x":41.41,"y":77.17},"344":{"x":46.69,"y":76.92},"346":{"x":48.74,"y":76.86},"347":{"x":50.59,"y":78.01},"348":{"x":51.01,"y":77.1},"350":{"x":91.57,"y":78.27},"355":{"x":93.52,"y":76.79},"338":{"x":5.48,"y":67.91},"339":{"x":5.8,"y":64.87},"359":{"x":69.43,"y":64.89},"360":{"x":69.0,"y":62.09},"361":{"x":66.9,"y":41.48},"362":{"x":66.89,"y":39.44},"356":{"x":93.12,"y":34.76},"357":{"x":92.91,"y":30.73},"358":{"x":92.68,"y":33.51}}};
 // __PLAN_COORDS_END__
 var PLAN_FLOORS=Object.keys(PLAN_COORDS);
+// Kat sıralaması: önce blok adı (A, B...), blok içinde kat numarası küçükten büyüğe
+function katCmp(a,b){
+  function kk(s){var m=/KAT\s*(\d+)/i.exec(s||"");return [String(s||"").replace(/KAT\s*\d+.*/i,"").trim().toUpperCase(),m?parseInt(m[1],10):9999];}
+  var A=kk(a),B=kk(b);
+  if(A[0]!==B[0])return A[0]<B[0]?-1:1;
+  if(A[1]!==B[1])return A[1]-B[1];
+  return String(a).localeCompare(String(b),"tr");
+}
 function doorFloor(door){var m=/KAT\s*\d+/.exec(door.mahal||"");return m?m[0].replace(/\s+/," "):"";}
 function planHasDoor(door){var fl=doorFloor(door);return !!(PLAN_COORDS[fl]&&PLAN_COORDS[fl][door.code]);}
 
@@ -1606,11 +1614,15 @@ export default function App(){
           // Sheet 0: Proje Özeti
           var hwLbl={hw_lock:"Kilit",hw_handle:"Kol",hw_closer:"Hidrolik",hw_acc:"Aksesuar"};
           var sTot=doors.length,sDone=0,sAccMiss=0,sReady=0,sNotReady=0;
-          var accRows=[],readyMap={},nrMap={};
+          var accRows=[],readyMap={},nrMap={},katMat={};
           doors.forEach(function(d2){
             var st=d2.steps||{};var p=pct(d2);
             var fl=(st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done);
             var sst=siteSt(d2);
+            var km=katMat[d2.mahal||"—"]||(katMat[d2.mahal||"—"]={tot:0,mont:0,done:0,acc:0,ready:0,nr:0,ps:0});
+            km.tot++;km.ps+=p;if(fl)km.mont++;
+            if(p===100)km.done++;else if(fl)km.acc++;
+            if(sst==="not_ready")km.nr++;else if(sst==="ready"&&!(st.frame&&st.frame.done))km.ready++;
             if(p===100)sDone++;
             else if(fl){
               sAccMiss++;
@@ -1660,6 +1672,15 @@ export default function App(){
             ["Yeri hazır olmayan",sNotReady],
             ["Ortalama ilerleme","%"+overallPct],[]
           ];
+          sumRows.push(["KAT MATRİSİ"]);
+          sumRows.push(["Bölge / Kat","Toplam","Montajı Yapılan","%100 Biten","Aksesuar Eksik","Montaja Hazır","Yeri Hazır Değil","İlerleme %"]);
+          var kmTot={tot:0,mont:0,done:0,acc:0,ready:0,nr:0,ps:0};
+          Object.keys(katMat).sort(katCmp).forEach(function(k){
+            var km=katMat[k];["tot","mont","done","acc","ready","nr","ps"].forEach(function(f){kmTot[f]+=km[f];});
+            sumRows.push([k,km.tot,km.mont,km.done,km.acc,km.ready,km.nr,km.tot>0?Math.round(km.ps/km.tot):0]);
+          });
+          sumRows.push(["TOPLAM",kmTot.tot,kmTot.mont,kmTot.done,kmTot.acc,kmTot.ready,kmTot.nr,kmTot.tot>0?Math.round(kmTot.ps/kmTot.tot):0]);
+          sumRows.push([]);
           if(accRows.length>0){
             sumRows.push(["SADECE AKSESUAR EKSİK KAPILAR ("+sAccMiss+")"]);
             sumRows.push(["Bölge","Kapı","Eksik Aksesuarlar"]);
@@ -1667,7 +1688,7 @@ export default function App(){
           }
           sumRows.push(["MONTAJA HAZIR KAPILAR — BÖLGE BÖLGE ("+sReady+")"]);
           sumRows.push(["Bölge","Adet","Kapılar"]);
-          Object.keys(readyMap).sort().forEach(function(bk){sumRows.push([bk,readyMap[bk].length,readyMap[bk].join(", ")]);});
+          Object.keys(readyMap).sort(katCmp).forEach(function(bk){sumRows.push([bk,readyMap[bk].length,readyMap[bk].join(", ")]);});
           sumRows.push([]);
           sumRows.push(["YERİ HAZIR OLMAYANLAR — SEBEP ÖZETİ ("+sNotReady+")"]);
           sumRows.push(["Sebep","Adet","Kapılar"]);
@@ -1690,18 +1711,22 @@ export default function App(){
           XLSX.utils.book_append_sheet(wb2,ws3,"Fotoğraflar");
           XLSX.writeFile(wb2,selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Report.xlsx");
         }
-        function exportPhotoHTML(){
+        function buildPhotoHTML(){
           var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>@media print{.door{page-break-inside:avoid;}}body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;margin-bottom:4px;}.subtitle{color:#888;font-size:13px;margin-bottom:20px;}.door{background:#fff;border-radius:12px;padding:16px;margin:14px 0;border:1px solid #e8e8e8;}.doorhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e67e22;padding-bottom:8px;margin-bottom:8px;}.doorhead h2{color:#333;margin:0;font-size:18px;}.progress{font-size:20px;font-weight:bold;}.p100{color:#27ae60;}.p50{color:#e67e22;}.p0{color:#aaa;}.meta{color:#666;font-size:12px;margin:2px 0;}.stepbox{background:#fef9f4;border-left:3px solid #e67e22;padding:8px 12px;margin:10px 0;border-radius:0 8px 8px 0;}.stepname{font-weight:bold;color:#333;font-size:13px;}.stepdate{color:#888;font-size:11px;}.stepnote{color:#555;font-size:12px;font-style:italic;margin-top:2px;}.status-ready{color:#27ae60;font-weight:bold;}.status-notready{color:#e74c3c;font-weight:bold;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;}.phbox{width:172px;}img{width:172px;height:129px;object-fit:cover;border-radius:8px;border:1px solid #ddd;display:block;}.badge{display:inline-block;font-size:12px;font-weight:bold;padding:4px 12px;border-radius:14px;margin-bottom:8px;color:#fff;}.b-done{background:#27ae60;}.b-acc{background:#9b59b6;}.b-prog{background:#2a7fff;}.b-ready{background:#16a085;}.b-nr{background:#e74c3c;}.b-none{background:#95a5a6;}.chips{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 2px;}.chip{border-radius:8px;padding:4px 9px;text-align:center;min-width:52px;}.ch-l{font-size:10px;font-weight:bold;}.ch-s{font-size:10px;margin-top:1px;}.ch-done{background:#eafaf0;border:1px solid #27ae60;color:#1d8a4a;}.ch-no{background:#f2f3f4;border:1px solid #d5d8da;color:#95a0a6;}.ch-bad{background:#fdeeec;border:1px solid #e74c3c;color:#c0392b;}.sumbox{background:#fff;border:2px solid #e67e22;border-radius:12px;padding:16px;margin-bottom:20px;}@media print{.sumbox{page-break-after:always;}}.sumtitle{font-size:15px;font-weight:bold;color:#e67e22;margin-bottom:10px;}.sumtitle2{font-size:13px;font-weight:bold;color:#333;margin:14px 0 4px;}.sumtitle2.red{color:#c0392b;}.stats{display:flex;flex-wrap:wrap;gap:8px;}.stt{flex:1;min-width:100px;background:#fef5eb;border-radius:8px;padding:9px 6px;text-align:center;font-size:11px;color:#666;}.stt b{display:block;font-size:21px;color:#333;margin-bottom:2px;}table.t{width:100%;border-collapse:collapse;font-size:12px;}.t th{background:#f4e8d8;text-align:left;padding:5px 8px;font-size:11px;}.t td{border-top:1px solid #eee;padding:5px 8px;vertical-align:top;}</style></head><body>";
           html+="<h1>"+selProj.name+"</h1><div class='subtitle'>Fotoğraflı İlerleme Raporu · "+new Date().toLocaleDateString("tr-TR")+" "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
           // ÜST ÖZET — işverene dönük: genel durum + hazır olmayanların kat bazında dökümü
           (function(){
             var HWL={hw_lock:"Kilit",hw_handle:"Kol/Panikbar",hw_closer:"Hidrolik",hw_acc:"Aksesuar"};
             var sm={tot:doors.length,done:0,acc:0,ready:0,nr:0},pctSum=0;
-            var nrByKat={},rdByKat={},accByKat={};
+            var nrByKat={},rdByKat={},accByKat={},mat={};
             doors.forEach(function(d2){
               var st=d2.steps||{};var p=pct(d2);pctSum+=p;
               var fl=(st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done);
               var sst=siteSt(d2);var kat=d2.mahal||"—";
+              var mm=mat[kat]||(mat[kat]={tot:0,mont:0,done:0,acc:0,ready:0,nr:0,ps:0});
+              mm.tot++;mm.ps+=p;if(fl)mm.mont++;
+              if(p===100)mm.done++;else if(fl)mm.acc++;
+              if(sst==="not_ready")mm.nr++;else if(sst==="ready"&&!(st.frame&&st.frame.done))mm.ready++;
               if(p===100)sm.done++;
               else if(fl){
                 sm.acc++;var miss=[];
@@ -1732,10 +1757,20 @@ export default function App(){
             html+="<div class='stt' style='background:#fdeeec'><b style='color:#e74c3c'>"+sm.nr+"</b>Yeri Hazır Değil</div>";
             html+="<div class='stt'><b style='color:#e67e22'>%"+avg+"</b>Ortalama İlerleme</div>";
             html+="</div>";
+            // Kat matrisi
+            html+="<div class='sumtitle2'>🏢 KAT MATRİSİ</div><table class='t'><tr><th>Bölge / Kat</th><th>Toplam</th><th>Montajı Yapılan</th><th>%100 Biten</th><th>Aksesuar Eksik</th><th>Montaja Hazır</th><th>Yeri Hazır Değil</th><th>İlerleme</th></tr>";
+            var mtot={tot:0,mont:0,done:0,acc:0,ready:0,nr:0,ps:0};
+            Object.keys(mat).sort(katCmp).forEach(function(k){
+              var mm=mat[k];["tot","mont","done","acc","ready","nr","ps"].forEach(function(f){mtot[f]+=mm[f];});
+              var kp=mm.tot>0?Math.round(mm.ps/mm.tot):0;
+              html+="<tr><td>"+k+"</td><td>"+mm.tot+"</td><td>"+mm.mont+"</td><td style='color:#27ae60;font-weight:bold'>"+mm.done+"</td><td>"+(mm.acc||"")+"</td><td>"+(mm.ready||"")+"</td><td style='color:#c0392b;font-weight:bold'>"+(mm.nr||"")+"</td><td><b>%"+kp+"</b></td></tr>";
+            });
+            var tp=mtot.tot>0?Math.round(mtot.ps/mtot.tot):0;
+            html+="<tr style='background:#f4e8d8;font-weight:bold'><td>TOPLAM</td><td>"+mtot.tot+"</td><td>"+mtot.mont+"</td><td>"+mtot.done+"</td><td>"+mtot.acc+"</td><td>"+mtot.ready+"</td><td>"+mtot.nr+"</td><td>%"+tp+"</td></tr></table>";
             function katTable(title,map,cls){
               var keys=Object.keys(map);if(keys.length===0)return;
               html+="<div class='sumtitle2 "+(cls||"")+"'>"+title+"</div><table class='t'><tr><th style='width:160px'>Bölge / Kat</th><th style='width:46px'>Adet</th><th>Kapılar</th></tr>";
-              keys.sort().forEach(function(k){html+="<tr><td>"+k+"</td><td>"+map[k].length+"</td><td>"+map[k].join(" · ")+"</td></tr>";});
+              keys.sort(katCmp).forEach(function(k){html+="<tr><td>"+k+"</td><td>"+map[k].length+"</td><td>"+map[k].join(" · ")+"</td></tr>";});
               html+="</table>";
             }
             katTable("⛔ YERİ HAZIR OLMAYAN KAPILAR — KAT BAZINDA ("+sm.nr+" adet)",nrByKat,"red");
@@ -1793,8 +1828,27 @@ export default function App(){
           });
           if(!hasAny)html+="<p>Henüz fotoğraf veya not girilmemiş.</p>";
           html+="</body></html>";
+          return html;
+        }
+        function exportPhotoHTML(){
+          var html=buildPhotoHTML();
           var blob=new Blob([html],{type:"text/html"});
           var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Foto_Rapor.html";a.click();
+        }
+        function sharePhotoLink(){
+          if(!window.confirm("Rapor buluta yüklenip paylaşılabilir bir link oluşturulacak. Devam edilsin mi?"))return;
+          var html=buildPhotoHTML();
+          var dt=new Date();
+          var stamp=dt.getFullYear()+("0"+(dt.getMonth()+1)).slice(-2)+("0"+dt.getDate()).slice(-2)+"-"+("0"+dt.getHours()).slice(-2)+("0"+dt.getMinutes()).slice(-2);
+          var path="reports/"+selProjId+"/"+stamp+".html";
+          uploadString(storageRef(storage,path),html,"raw",{contentType:"text/html; charset=utf-8"})
+            .then(function(snap){return getDownloadURL(snap.ref);})
+            .then(function(url){
+              var copied=false;
+              try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url);copied=true;}}catch(e){}
+              window.prompt((copied?"Link panoya kopyalandı ✓":"Linki kopyala")+" — WhatsApp/e-posta ile gönderebilirsin. Link açıldığında rapor bu anki haliyle görünür:",url);
+            })
+            .catch(function(e){alert("Link oluşturulamadı: "+(e&&e.message?e.message:e));});
         }
 
         return(
@@ -1819,7 +1873,8 @@ export default function App(){
             </div>
 
             <button onClick={exportXL} style={{...B,background:"linear-gradient(135deg,#27ae60,#219a52)",color:"#fff",width:"100%",padding:14,fontSize:14,fontWeight:600,borderRadius:12,border:"1px solid #2a5a3a",marginBottom:8}}>📥 Export to Excel (Matrix + Timeline)</button>
-            <button onClick={exportPhotoHTML} style={{...B,background:"linear-gradient(135deg,#e67e22,#d35400)",color:"#fff",width:"100%",padding:14,fontSize:14,fontWeight:600,borderRadius:12,border:"1px solid #c9651a",marginBottom:16}}>📸 Fotoğraf Raporu (HTML)</button>
+            <button onClick={exportPhotoHTML} style={{...B,background:"linear-gradient(135deg,#e67e22,#d35400)",color:"#fff",width:"100%",padding:14,fontSize:14,fontWeight:600,borderRadius:12,border:"1px solid #c9651a",marginBottom:8}}>📸 Fotoğraf Raporu (HTML indir)</button>
+            <button onClick={sharePhotoLink} style={{...B,background:"linear-gradient(135deg,#2a7fff,#1b5fd0)",color:"#fff",width:"100%",padding:14,fontSize:14,fontWeight:600,borderRadius:12,border:"1px solid #1b4fa8",marginBottom:16}}>🔗 Rapor Linki Oluştur (firmaya gönder)</button>
 
             {/* MATRIX VIEW */}
             {reportTab==="matrix"&&doors.length>0&&(
