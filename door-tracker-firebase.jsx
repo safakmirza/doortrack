@@ -153,8 +153,8 @@ function migrateDistStep(projList){
       var mounted=(st.frame&&st.frame.done)||(st.leaf&&st.leaf.done);
       if(mounted&&(!st.dist||!st.dist.done)){
         if(!d2.steps)d2.steps={};
-        var refDate=(st.frame&&st.frame.date)||(st.leaf&&st.leaf.date)||Date.now();
-        d2.steps.dist={done:true,date:refDate,auto:true};
+        var refDate=(st.frame&&st.frame.completedAt)||(st.leaf&&st.leaf.completedAt)||Date.now();
+        d2.steps.dist={done:true,completedAt:refDate,auto:true};
         d2._ts=Date.now();
         changed=true;
       }
@@ -1603,56 +1603,143 @@ export default function App(){
           });
           var ws3=XLSX.utils.aoa_to_sheet(phRows);
 
+          // Sheet 0: Proje Özeti
+          var hwLbl={hw_lock:"Kilit",hw_handle:"Kol",hw_closer:"Hidrolik",hw_acc:"Aksesuar"};
+          var sTot=doors.length,sDone=0,sAccMiss=0,sReady=0,sNotReady=0;
+          var accRows=[],readyMap={},nrMap={};
+          doors.forEach(function(d2){
+            var st=d2.steps||{};var p=pct(d2);
+            var fl=(st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done);
+            var sst=siteSt(d2);
+            if(p===100)sDone++;
+            else if(fl){
+              sAccMiss++;
+              var miss=[];
+              getStepsForDoor(d2).forEach(function(s2){if(hwLbl[s2.id]&&!(st[s2.id]&&st[s2.id].done))miss.push(hwLbl[s2.id]);});
+              accRows.push([d2.mahal||"—",d2.code,miss.join(", ")]);
+            }
+            if(sst==="not_ready"){
+              sNotReady++;
+              var rs=(st.site_check&&st.site_check.reasons)||[];
+              if(rs.length===0)rs=["duvar"];
+              rs.forEach(function(rid){
+                var lab=rid;SITE_REASONS.forEach(function(r){if(r.id===rid)lab=r.label.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,"").trim();});
+                if(!nrMap[lab])nrMap[lab]=[];
+                nrMap[lab].push(d2.code);
+              });
+            }else if(sst==="ready"&&!(st.frame&&st.frame.done)){
+              sReady++;
+              var bk=d2.mahal||"—";
+              if(!readyMap[bk])readyMap[bk]=[];
+              readyMap[bk].push(d2.code);
+            }
+          });
+          var AYL=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+          function wkKey(t){var dd=new Date(t);var day=(dd.getDay()+6)%7;dd.setHours(0,0,0,0);return dd.getTime()-day*86400000;}
+          function moKey(t){var dd=new Date(t);return dd.getFullYear()*100+dd.getMonth();}
+          var wk={},mo={};
+          function bump(map,k,f){if(!map[k])map[k]={dag:0,kasa:0,kanat:0,mont:0,tam:0};map[k][f]++;}
+          doors.forEach(function(d2){
+            var st=d2.steps||{};
+            function ev(f,t){if(!t)return;bump(wk,wkKey(t),f);bump(mo,moKey(t),f);}
+            if(st.dist&&st.dist.done&&st.dist.completedAt)ev("dag",st.dist.completedAt);
+            if(st.frame&&st.frame.done&&st.frame.completedAt)ev("kasa",st.frame.completedAt);
+            if(st.leaf&&st.leaf.done&&st.leaf.completedAt)ev("kanat",st.leaf.completedAt);
+            if((st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done)){var mt=Math.max(st.frame.completedAt||0,st.leaf.completedAt||0);if(mt)ev("mont",mt);}
+            if(pct(d2)===100){var mx=0;getStepsForDoor(d2).forEach(function(s2){var sd2=st[s2.id];if(sd2&&sd2.done&&sd2.completedAt&&STEP_W[s2.id])mx=Math.max(mx,sd2.completedAt);});if(mx)ev("tam",mx);}
+          });
+          function fmtD0(ms){var dd=new Date(ms);return ("0"+dd.getDate()).slice(-2)+"."+("0"+(dd.getMonth()+1)).slice(-2)+"."+dd.getFullYear();}
+          var sumRows=[
+            [selProj.name+" — PROJE ÖZETİ"],
+            ["Oluşturma: "+new Date().toLocaleDateString("en-GB")],[],
+            ["GENEL DURUM"],
+            ["Toplam kapı",sTot],
+            ["Montajı tamamlanan (%100)",sDone],
+            ["Kasa+kanat monte — sadece aksesuar eksik",sAccMiss],
+            ["Montaja hazır (yeri hazır, montaj başlamadı)",sReady],
+            ["Yeri hazır olmayan",sNotReady],
+            ["Ortalama ilerleme","%"+overallPct],[]
+          ];
+          if(accRows.length>0){
+            sumRows.push(["SADECE AKSESUAR EKSİK KAPILAR ("+sAccMiss+")"]);
+            sumRows.push(["Bölge","Kapı","Eksik Aksesuarlar"]);
+            accRows.forEach(function(r){sumRows.push(r);});sumRows.push([]);
+          }
+          sumRows.push(["MONTAJA HAZIR KAPILAR — BÖLGE BÖLGE ("+sReady+")"]);
+          sumRows.push(["Bölge","Adet","Kapılar"]);
+          Object.keys(readyMap).sort().forEach(function(bk){sumRows.push([bk,readyMap[bk].length,readyMap[bk].join(", ")]);});
+          sumRows.push([]);
+          sumRows.push(["YERİ HAZIR OLMAYANLAR — SEBEP ÖZETİ ("+sNotReady+")"]);
+          sumRows.push(["Sebep","Adet","Kapılar"]);
+          Object.keys(nrMap).sort(function(a,b){return nrMap[b].length-nrMap[a].length;}).forEach(function(lab){sumRows.push([lab,nrMap[lab].length,nrMap[lab].join(", ")]);});
+          sumRows.push([]);
+          sumRows.push(["HAFTALIK İLERLEME (adet)"]);
+          sumRows.push(["Hafta Başı","Dağıtım","Kasa","Kanat","Kasa+Kanat Tamam","%100 Olan"]);
+          Object.keys(wk).map(Number).sort(function(a,b){return a-b;}).forEach(function(k){var v=wk[k];sumRows.push([fmtD0(k),v.dag,v.kasa,v.kanat,v.mont,v.tam]);});
+          sumRows.push([]);
+          sumRows.push(["AYLIK İLERLEME (adet)"]);
+          sumRows.push(["Ay","Dağıtım","Kasa","Kanat","Kasa+Kanat Tamam","%100 Olan"]);
+          Object.keys(mo).map(Number).sort(function(a,b){return a-b;}).forEach(function(k){var v=mo[k];sumRows.push([AYL[k%100]+" "+Math.floor(k/100),v.dag,v.kasa,v.kanat,v.mont,v.tam]);});
+          var ws0=XLSX.utils.aoa_to_sheet(sumRows);
+          ws0["!cols"]=[{wch:40},{wch:10},{wch:80},{wch:16},{wch:16},{wch:12}];
+
           var wb2=XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb2,ws0,"Özet");
           XLSX.utils.book_append_sheet(wb2,ws1,"Rapor");
           XLSX.utils.book_append_sheet(wb2,ws2,"Timeline");
           XLSX.utils.book_append_sheet(wb2,ws3,"Fotoğraflar");
           XLSX.writeFile(wb2,selProj.name.replace(/[^a-zA-Z0-9 ]/g,"")+"_Report.xlsx");
         }
         function exportPhotoHTML(){
-          var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>@media print{.door{page-break-inside:avoid;}}body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;margin-bottom:4px;}.subtitle{color:#888;font-size:13px;margin-bottom:20px;}.door{background:#fff;border-radius:12px;padding:16px;margin:14px 0;border:1px solid #e8e8e8;}.doorhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e67e22;padding-bottom:8px;margin-bottom:8px;}.doorhead h2{color:#333;margin:0;font-size:18px;}.progress{font-size:20px;font-weight:bold;}.p100{color:#27ae60;}.p50{color:#e67e22;}.p0{color:#aaa;}.meta{color:#666;font-size:12px;margin:2px 0;}.stepbox{background:#fef9f4;border-left:3px solid #e67e22;padding:8px 12px;margin:10px 0;border-radius:0 8px 8px 0;}.stepname{font-weight:bold;color:#333;font-size:13px;}.stepdate{color:#888;font-size:11px;}.stepnote{color:#555;font-size:12px;font-style:italic;margin-top:2px;}.status-ready{color:#27ae60;font-weight:bold;}.status-notready{color:#e74c3c;font-weight:bold;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0;}img{width:260px;height:195px;object-fit:cover;border-radius:8px;border:1px solid #ddd;}</style></head><body>";
+          var html="<html><head><meta charset='utf-8'><title>"+selProj.name+" - Fotoğraf Raporu</title><style>@media print{.door{page-break-inside:avoid;}}body{font-family:Arial;max-width:900px;margin:0 auto;padding:20px;background:#f4f4f4;}h1{color:#e67e22;margin-bottom:4px;}.subtitle{color:#888;font-size:13px;margin-bottom:20px;}.door{background:#fff;border-radius:12px;padding:16px;margin:14px 0;border:1px solid #e8e8e8;}.doorhead{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e67e22;padding-bottom:8px;margin-bottom:8px;}.doorhead h2{color:#333;margin:0;font-size:18px;}.progress{font-size:20px;font-weight:bold;}.p100{color:#27ae60;}.p50{color:#e67e22;}.p0{color:#aaa;}.meta{color:#666;font-size:12px;margin:2px 0;}.stepbox{background:#fef9f4;border-left:3px solid #e67e22;padding:8px 12px;margin:10px 0;border-radius:0 8px 8px 0;}.stepname{font-weight:bold;color:#333;font-size:13px;}.stepdate{color:#888;font-size:11px;}.stepnote{color:#555;font-size:12px;font-style:italic;margin-top:2px;}.status-ready{color:#27ae60;font-weight:bold;}.status-notready{color:#e74c3c;font-weight:bold;}.photos{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;}.phbox{width:172px;}img{width:172px;height:129px;object-fit:cover;border-radius:8px;border:1px solid #ddd;display:block;}.badge{display:inline-block;font-size:12px;font-weight:bold;padding:4px 12px;border-radius:14px;margin-bottom:8px;color:#fff;}.b-done{background:#27ae60;}.b-acc{background:#9b59b6;}.b-prog{background:#2a7fff;}.b-ready{background:#16a085;}.b-nr{background:#e74c3c;}.b-none{background:#95a5a6;}.chips{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0 2px;}.chip{border-radius:8px;padding:4px 9px;text-align:center;min-width:52px;}.ch-l{font-size:10px;font-weight:bold;}.ch-s{font-size:10px;margin-top:1px;}.ch-done{background:#eafaf0;border:1px solid #27ae60;color:#1d8a4a;}.ch-no{background:#f2f3f4;border:1px solid #d5d8da;color:#95a0a6;}.ch-bad{background:#fdeeec;border:1px solid #e74c3c;color:#c0392b;}</style></head><body>";
           html+="<h1>"+selProj.name+"</h1><div class='subtitle'>Fotoğraflı İlerleme Raporu · "+new Date().toLocaleDateString("tr-TR")+" "+new Date().toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
           var hasAny=false;
+          var SHORTL={site_check:"Yer",dist:"Dağıtım",frame:"Kasa",leaf:"Kanat",hw_lock:"Kilit",hw_handle:"Kol",hw_closer:"Hidrolik",hw_acc:"Aksesuar",hw_test:"Test",final:"Son Kontrol"};
           doors.forEach(function(d2){
             var dSteps=getStepsForDoor(d2);
-            var stepData=[];
-            var doneCount=0;
-            dSteps.forEach(function(st){
-              var sd=d2.steps&&d2.steps[st.id]?d2.steps[st.id]:{};
-              if(sd.done)doneCount++;
-              if((sd.photos&&sd.photos.length>0)||sd.notes||sd.siteStatus){
-                stepData.push({label:st.label,data:sd});
-              }
+            var st=d2.steps||{};
+            var anyContent=false;
+            dSteps.forEach(function(s2){var sd=st[s2.id]||{};if(sd.done||(sd.photos&&sd.photos.length>0)||sd.notes||sd.siteStatus)anyContent=true;});
+            if(!anyContent)return;
+            hasAny=true;
+            var pctVal=pct(d2);
+            var fl=(st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done);
+            var sst=siteSt(d2);
+            var badge,bcls;
+            if(pctVal===100){badge="✅ TAMAMLANDI";bcls="b-done";}
+            else if(fl){badge="🔧 KASA+KANAT MONTE — AKSESUAR EKSİK";bcls="b-acc";}
+            else if((st.dist&&st.dist.done)||(st.frame&&st.frame.done)||(st.leaf&&st.leaf.done)){badge="🏗 MONTAJ DEVAM EDİYOR";bcls="b-prog";}
+            else if(sst==="ready"){badge="📦 MONTAJA HAZIR";bcls="b-ready";}
+            else if(sst==="not_ready"){var rr6=((st.site_check||{}).reasons||[]).map(reasonLabel).join(", ");badge="⛔ YER HAZIR DEĞİL"+(rr6?" — "+rr6:"");bcls="b-nr";}
+            else{badge="BAŞLANMADI";bcls="b-none";}
+            var pcls=pctVal>=100?"p100":pctVal>0?"p50":"p0";
+            html+="<div class='door'>";
+            html+="<div class='badge "+bcls+"'>"+badge+"</div>";
+            html+="<div class='doorhead'><h2>#"+d2.code+" — "+(d2.kapiTipi||"")+"</h2><span class='progress "+pcls+"'>%"+pctVal+"</span></div>";
+            var cn=d2.assignedTo?getCarpName(d2.assignedTo):"";
+            html+="<div class='meta'>📍 "+(d2.mahal||"")+(cn?" &nbsp;·&nbsp; 👷 "+cn:"")+"</div>";
+            html+="<div class='chips'>";
+            dSteps.forEach(function(s2){
+              var sd=st[s2.id]||{};
+              var lbl=SHORTL[s2.id]||s2.label;
+              var mark,cls;
+              if(s2.id==="site_check"){mark=sst==="ready"?"✓":(sst==="not_ready"?"✗":"—");cls=sst==="ready"?"ch-done":(sst==="not_ready"?"ch-bad":"ch-no");}
+              else{mark=sd.done?"✓":"—";cls=sd.done?"ch-done":"ch-no";}
+              var dt=sd.completedAt?new Date(sd.completedAt).toLocaleDateString("tr-TR",{day:"2-digit",month:"2-digit"}):"";
+              html+="<div class='chip "+cls+"'><div class='ch-l'>"+lbl+"</div><div class='ch-s'>"+mark+(dt?" "+dt:"")+"</div></div>";
             });
-            var pctVal=dSteps.length>0?Math.round(doneCount/dSteps.length*100):0;
-            if(stepData.length>0){
-              hasAny=true;
-              var pcls=pctVal>=100?"p100":pctVal>0?"p50":"p0";
-              html+="<div class='door'><div class='doorhead'><h2>#"+d2.code+" — "+d2.kapiTipi+"</h2><span class='progress "+pcls+"'>%"+pctVal+"</span></div>";
-              html+="<div class='meta'>📍 "+(d2.mahal||"")+"</div>";
-              if(d2.assignedTo){var cn=getCarpName(d2.assignedTo);if(cn)html+="<div class='meta'>👷 "+cn+"</div>";}
-              stepData.forEach(function(sd2){
-                var s=sd2.data;
-                html+="<div class='stepbox'><div class='stepname'>"+sd2.label;
-                var sEff=s.siteStatus==="not_ready"?"not_ready":((s.siteStatus==="ready"||s.done)?"ready":"");
-                if(sd2.label==="Yer Kontrolü"){if(sEff==="ready")html+=" <span class='status-ready'>✅ Hazır</span>";if(sEff==="not_ready"){html+=" <span class='status-notready'>❌ Hazır Değil</span>";var rr6=(s.reasons||[]).map(reasonLabel).join(", ");if(rr6)html+=" <span class='status-notready' style='font-weight:normal'>("+rr6+")</span>";}}
-                else if(s.done)html+=" <span class='status-ready'>✓</span>";
-                html+="</div>";
-                if(s.completedAt)html+="<div class='stepdate'>🕐 "+new Date(s.completedAt).toLocaleDateString("tr-TR")+" "+new Date(s.completedAt).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
-                if(s.notes)html+="<div class='stepnote'>📝 "+s.notes+"</div>";
-                if(s.photos&&s.photos.length>0){
-                  html+="<div class='photos'>";
-                  s.photos.forEach(function(ph){
-                    html+="<div><img src='"+ph.data+"'/>";
-                    if(ph.at)html+="<div class='stepdate'>"+new Date(ph.at).toLocaleDateString("tr-TR")+" "+new Date(ph.at).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})+"</div>";
-                    html+="</div>";
-                  });
-                  html+="</div>";
-                }
-                html+="</div>";
+            html+="</div>";
+            dSteps.forEach(function(s2){var sd=st[s2.id]||{};if(sd.notes)html+="<div class='stepnote'>📝 "+(SHORTL[s2.id]||s2.label)+": "+sd.notes+"</div>";});
+            var phs=[];
+            dSteps.forEach(function(s2){var sd=st[s2.id]||{};(sd.photos||[]).forEach(function(ph){phs.push({ph:ph,lbl:SHORTL[s2.id]||s2.label});});});
+            if(phs.length>0){
+              html+="<div class='photos'>";
+              phs.forEach(function(it){
+                html+="<div class='phbox'><img src='"+it.ph.data+"'/><div class='stepdate'>"+it.lbl+(it.ph.at?" · "+new Date(it.ph.at).toLocaleDateString("tr-TR"):"")+"</div></div>";
               });
               html+="</div>";
             }
+            html+="</div>";
           });
           if(!hasAny)html+="<p>Henüz fotoğraf veya not girilmemiş.</p>";
           html+="</body></html>";
