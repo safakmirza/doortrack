@@ -156,6 +156,40 @@ function migrateSiteReasons(projList){
   return changedIds;
 }
 
+// HK-03 hakediş keşfinden teslim durumu: 2=aksesuar dahil teslim, 1=kasa-kanat teslim
+var TESLIM_MAP={"15":2,"16":2,"21":2,"22":2,"74":2,"75":2,"77":2,"81":2,"82":2,"96":2,"97":2,"98":2,"99":2,"103":2,"104":2,"129":2,"130":2,"131":2,"135":2,"136":2,"169":2,"170":2,"171":2,"172":2,"176":2,"177":2,"197":2,"204":2,"205":2,"237":2,"238":2,"239":2,"240":2,"244":2,"245":2,"290":2,"291":2,"292":2,"293":2,"297":2,"298":2,"314":2,"315":2,"316":2,"321":2,"340":2,"341":2,"342":2,"343":2,"348":2,"349":2,"1":1,"2":1,"3":1,"4":1,"18":1,"63":1,"66":1,"67":1,"78":1,"79":1,"80":1,"94":1,"95":1,"100":1,"101":1,"102":1,"109":1,"116":1,"117":1,"118":1,"119":1,"123":1,"132":1,"133":1,"134":1,"140":1,"141":1,"147":1,"148":1,"153":1,"154":1,"156":1,"157":1,"158":1,"159":1,"160":1,"161":1,"162":1,"163":1,"168":1,"174":1,"175":1,"182":1,"183":1,"185":1,"186":1,"187":1,"188":1,"189":1,"192":1,"193":1,"194":1,"195":1,"196":1,"202":1,"203":1,"211":1,"212":1,"213":1,"216":1,"218":1,"219":1,"220":1,"222":1,"223":1,"224":1,"225":1,"226":1,"235":1,"241":1,"242":1,"243":1,"246":1,"247":1,"251":1,"252":1,"253":1,"254":1,"258":1,"259":1,"260":1,"261":1,"262":1,"263":1,"267":1,"280":1,"281":1,"282":1,"283":1,"294":1,"295":1,"296":1,"300":1,"304":1,"305":1,"308":1,"309":1,"312":1,"313":1,"318":1,"319":1,"320":1,"323":1,"329":1,"336":1,"337":1,"338":1,"339":1,"344":1,"345":1,"346":1,"347":1,"361":1,"362":1};
+function migrateTeslim(projList){
+  var changedIds=[];
+  projList.forEach(function(proj){
+    var changed=false;
+    (proj.doors||[]).forEach(function(d2){
+      var lvl=TESLIM_MAP[d2.code];
+      if(lvl&&(!d2.teslim||d2.teslim.lvl!==lvl)){
+        d2.teslim={lvl:lvl,hk:"HK-03"};
+        d2._ts=Date.now();
+        changed=true;
+      }
+    });
+    if(changed)changedIds.push(proj.id);
+  });
+  return changedIds;
+}
+// İş akışı filtresi: kasa-kanat monte / aksesuar tamam / yeri hazır-başlanmamış / teslim
+function wfMatch(d2,f){
+  if(!f||f==="all")return true;
+  var st=d2.steps||{};
+  var fl=(st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done);
+  if(f==="kasakanat")return !!fl;
+  if(f==="aksesuar")return pct(d2)===100;
+  if(f==="yerhazir"){
+    if(siteSt(d2)!=="ready")return false;
+    var started=false;
+    ["frame","leaf","hw_lock","hw_handle","hw_closer","hw_acc","hw_test","final"].forEach(function(k){if(st[k]&&st[k].done)started=true;});
+    return !started;
+  }
+  if(f==="teslim")return !!(d2.teslim&&d2.teslim.lvl);
+  return true;
+}
 // Geçiş: kasası veya kanadı monte edilmiş kapılarda "Yerine Taşındı" adımını otomatik işaretle
 // (taşınmadan monte edilemez; kimse geriye dönüp elle işaretlemek zorunda kalmasın)
 function migrateDistStep(projList){
@@ -913,8 +947,18 @@ function DetailView(props){
       <PhotoViewer photo={viewPhoto} onClose={function(){setViewPhoto(null);}}/>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
         {onBack?(<button onClick={onBack} style={{...B,background:"transparent",color:"#e67e22",fontSize:13,padding:"6px 0",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:18,fontWeight:700}}>←</span> Kapılara Dön</button>):<span/>}
-        {onShowPlan&&planHasDoor(edit)&&(<button onClick={function(){onShowPlan(edit);}} style={{...B,background:"#eaf1ff",color:"#2a7fff",fontSize:12,padding:"7px 12px",border:"1px solid #2a7fff44"}}>🗺 Planda Göster</button>)}
+        <div style={{display:"flex",gap:8}}>
+          {!empMode&&(<button onClick={function(){var f2=Object.assign({},edit,{locPending:!edit.locPending});setEdit(f2);setDirty(true);setSaved(false);}} style={{...B,background:edit.locPending?"#e6a23c":"#fdf3e4",color:edit.locPending?"#fff":"#b36b00",fontSize:12,padding:"7px 12px",border:"1px solid #e6a23c88"}}>{edit.locPending?"📍 Yeri Değişti ✓":"📍 Yeri Değişti?"}</button>)}
+          {onShowPlan&&planHasDoor(edit)&&(<button onClick={function(){onShowPlan(edit);}} style={{...B,background:"#eaf1ff",color:"#2a7fff",fontSize:12,padding:"7px 12px",border:"1px solid #2a7fff44"}}>🗺 Planda Göster</button>)}
+        </div>
       </div>
+      {edit.locPending&&(<div style={{background:"#fdf3e4",border:"1px solid #e6a23c",borderRadius:10,padding:"8px 12px",marginBottom:10,fontSize:12,color:"#b36b00"}}>📍 Bu kapının yeri sahada değişti — doğru lokasyon teyit edilince işareti kaldırın (Kaydet'i unutmayın)</div>)}
+      {!empMode&&(<div style={{background:"#fff",border:"1px solid #e3e7eb",borderRadius:10,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:6}}>
+        <span style={{fontSize:12,color:"#555"}}>📦 Teslim: <b style={{color:edit.teslim&&edit.teslim.lvl===2?"#27ae60":(edit.teslim&&edit.teslim.lvl===1?"#f39c12":"#999")}}>{edit.teslim&&edit.teslim.lvl===2?("Aksesuar dahil teslim ("+(edit.teslim.hk||"HK")+")"):(edit.teslim&&edit.teslim.lvl===1?("Kasa-kanat teslim ("+(edit.teslim.hk||"HK")+")"):"Teslim edilmedi")}</b></span>
+        {isAdmin&&(<div style={{display:"flex",gap:4}}>
+          {[[0,"Yok"],[1,"Kasa-Kanat"],[2,"Aks. Dahil"]].map(function(o){var cur=(edit.teslim&&edit.teslim.lvl)||0;return <button key={o[0]} onClick={function(){var nt=o[0]===0?null:{lvl:o[0],hk:(edit.teslim&&edit.teslim.hk)||"HK-03"};var f2=Object.assign({},edit,{teslim:nt});setEdit(f2);setDirty(true);setSaved(false);}} style={{...B,background:cur===o[0]?"#1F3864":"#f0f2f5",color:cur===o[0]?"#fff":"#888",fontSize:10,padding:"4px 10px",border:"none"}}>{o[1]}</button>;})}
+        </div>)}
+      </div>)}
       <div style={{background:"linear-gradient(135deg,"+s.bg+",#fef5eb)",borderRadius:14,padding:16,marginBottom:16,border:"1px solid "+s.fg+"33"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
           <div style={{flex:1}}>
@@ -1038,6 +1082,7 @@ export default function App(){
   var listScrollRef=useRef(0);
   var empsS=useState([]);var emps=empsS[0],setEmps=empsS[1];
   var sfS=useState("all");var siteFilter=sfS[0],setSiteFilter=sfS[1];
+  var wfFS=useState("all");var wfFilter=wfFS[0],setWfFilter=wfFS[1];
   var ddS=useState(new Date().toISOString().slice(0,10));var dailyDate=ddS[0],setDailyDate=ddS[1];
   var pkS=useState(PLAN_FLOORS[0]||"");var planKat=pkS[0],setPlanKat=pkS[1];
   var pfS=useState(null);var planFocus=pfS[0],setPlanFocus=pfS[1];
@@ -1083,6 +1128,8 @@ export default function App(){
       var migrated=migrateSiteReasons(loadedProj);
       var migrated2=migrateDistStep(loadedProj);
       migrated2.forEach(function(id){if(migrated.indexOf(id)<0)migrated.push(id);});
+      var migrated3=migrateTeslim(loadedProj);
+      migrated3.forEach(function(id){if(migrated.indexOf(id)<0)migrated.push(id);});
       setProjects(loadedProj);
       if(migrated.length>0){loadedProj.forEach(function(p){if(migrated.indexOf(p.id)>=0)saveProject(p);});}
       setCarps(res[1]&&res[1].length>0?res[1]:DEFAULT_CARPS);
@@ -1322,6 +1369,7 @@ export default function App(){
                     <button onClick={function(){go("qrLabels");}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#333333",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🏷 QR Etiketleri</button>
                     <button onClick={function(){var data={"dtv7-proj":JSON.stringify(projects),"dtv7-carp":JSON.stringify(carps),"dtv7-cat":JSON.stringify(catalog),"dtv7-cimg":JSON.stringify(catImages),"dtv7-prices":JSON.stringify(prices),"dtv7-emp":JSON.stringify(emps),"dtv7-plans":JSON.stringify(planUrls)};var blob=new Blob([JSON.stringify(data)],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="doortrack-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#27ae60",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📤 Veri Yedekle</button>
                     <button onClick={function(){var inp=document.createElement("input");inp.type="file";inp.accept=".json";inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(ev){try{var data=JSON.parse(ev.target.result);var keys=Object.keys(data);var promises=keys.map(function(k){return sSet(k,JSON.parse(data[k]));});Promise.all(promises).then(function(){window.location.reload();});}catch(err){alert("Hatalı dosya");}};rd.readAsText(f);};inp.click();setMenuOpen(false);}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",borderBottom:"1px solid #1e3a5f",color:"#2a7fff",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📥 Veri Geri Yükle</button>
+                    <button onClick={function(){if(window.confirm("Dağıtımı henüz işaretlenmemiş TÜM kapılarda '📦 Kasa & Kanat Yerine Taşındı' adımı tamamlandı olarak işaretlenecek. Devam edilsin mi?")){var ts9=Date.now();setProjects(function(p){return p.map(function(proj){if(proj.id!==selProjId)return proj;return Object.assign({},proj,{doors:(proj.doors||[]).map(function(d){var st9=d.steps||{};if(st9.dist&&st9.dist.done)return d;var ns9=Object.assign({},st9);ns9.dist={done:true,completedAt:ts9,updatedAt:ts9};return Object.assign({},d,{steps:ns9,_ts:Date.now()});})});});});setMenuOpen(false);}}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",color:"#1a1a2a",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>📦 Tümünü "Dağıtıldı" İşaretle</button>
                     <button onClick={function(){if(window.confirm("Tüm kapılar silinsin mi?")){setProjects(function(p){var next=p.map(function(proj){if(proj.id!==selProjId)return proj;var dm=Object.assign({},proj.del||{});var ts=Date.now();(proj.doors||[]).forEach(function(d){dm[d.id]=ts;});return Object.assign({},proj,{doors:[],del:dm});});return next;});setMenuOpen(false);}}} style={{display:"flex",alignItems:"center",gap:10,width:"100%",padding:"13px 16px",background:"transparent",border:"none",color:"#e74c3c",fontSize:13,fontFamily:"inherit",cursor:"pointer",textAlign:"left"}}>🗑 Kapıları Temizle</button>
                   </div>
                 </div>)}
@@ -1455,8 +1503,10 @@ export default function App(){
               var mf=filter==="all"||stat(d2)===filter;
               var sst=siteSt(d2);
               var msf=siteFilter==="all"||(siteFilter==="ready"&&sst==="ready")||(siteFilter==="not_ready"&&sst==="not_ready")||(siteFilter==="unchecked"&&!sst);
-              return ms&&mf&&msf;
+              return ms&&mf&&msf&&wfMatch(d2,wfFilter);
             });
+            var wfC={kasakanat:0,aksesuar:0,yerhazir:0,teslim:0};
+            selProj.doors.forEach(function(d2){["kasakanat","aksesuar","yerhazir","teslim"].forEach(function(k){if(wfMatch(d2,k))wfC[k]++;});});
             var allF=filtered.length>0;filtered.forEach(function(d2){if(!bulkSel[d2.id])allF=false;});
             return(
               <div style={{paddingBottom:isBulk&&Object.keys(bulkSel).length>0?80:0}}>
@@ -1467,6 +1517,10 @@ export default function App(){
                 <div style={{display:"flex",gap:6,marginBottom:6,flexWrap:"wrap"}}>
                   {[["all","📍 Yer: Tümü"],["ready","🟢 Hazır ("+srdy+")"],["not_ready","🔴 Değil ("+snot+")"],["unchecked","⚪ Kontrolsüz ("+sun+")"]].map(function(f2){return <button key={f2[0]} onClick={function(){setSiteFilter(f2[0]);}} style={{...B,background:siteFilter===f2[0]?(f2[0]==="not_ready"?"#e74c3c":f2[0]==="ready"?"#27ae60":"#2a7fff"):"#fff",color:siteFilter===f2[0]?"#fff":"#777",fontSize:10,padding:"5px 10px",border:siteFilter===f2[0]?"none":"1px solid #ddd"}}>{f2[1]}</button>;})}
                 </div>
+                <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+                  {[["all","⚙ Tümü"],["kasakanat","🏗 Kasa+Kanat Monte ("+wfC.kasakanat+")"],["aksesuar","🔧 Aksesuar Tamam ("+wfC.aksesuar+")"],["yerhazir","📍 Hazır · Başlanmamış ("+wfC.yerhazir+")"],["teslim","📦 Teslim Edildi ("+wfC.teslim+")"]].filter(function(f2){return !(isEmp&&f2[0]==="teslim");}).map(function(f2){return <button key={f2[0]} onClick={function(){setWfFilter(f2[0]);}} style={{...B,background:wfFilter===f2[0]?"#1F3864":"#fff",color:wfFilter===f2[0]?"#fff":"#777",fontSize:10,padding:"5px 10px",border:wfFilter===f2[0]?"none":"1px solid #ddd"}}>{f2[1]}</button>;})}
+                </div>
+
                 <div style={{fontSize:11,color:"#888",marginBottom:12}}>📍 Yer durumu: <span style={{color:"#27ae60",fontWeight:600}}>{srdy} hazır</span> · <span style={{color:"#e74c3c",fontWeight:600}}>{snot} hazır değil</span> · {sun} kontrolsüz</div>
                 {isBulk&&filtered.length>0&&(
                   <div onClick={function(){if(allF)setBulkSel({});else{var s2=Object.assign({},bulkSel);filtered.forEach(function(d2){s2[d2.id]=true;});setBulkSel(s2);}}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:"#ffffff",borderRadius:10,marginBottom:8,cursor:"pointer",border:"1px solid #ddd"}}>
@@ -1487,6 +1541,7 @@ export default function App(){
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
                               <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:15,color:"#1a1a2a"}}>#{door.code}</span>
                               <span style={{background:s2.bg,color:s2.fg,fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:600,textTransform:"uppercase"}}>{s2.lb}</span>
+                              {(!isEmp)&&door.teslim&&door.teslim.lvl?(<span style={{fontSize:8,background:door.teslim.lvl===2?"#27ae60":"#f39c12",color:"#fff",padding:"2px 6px",borderRadius:4,fontWeight:700}}>{door.teslim.lvl===2?"📦 TESLİM":"📦 KK TESLİM"}</span>):null}
                               {door.hwSetNo&&<span style={{fontSize:8,background:"#f0f0f5",color:"#888",padding:"2px 5px",borderRadius:3}}>{door.hwSetNo}</span>}
                               {(function(){var s3=siteSt(door);if(s3==="not_ready"){var rt4=reasonsText(door);return <span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL{rt4?" — "+rt4:""}</span>;}if(s3==="ready"&&p2===0)return <span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>;return null;})()}
                             </div>
@@ -1676,6 +1731,9 @@ export default function App(){
             ["Kasa+kanat monte — sadece aksesuar eksik",sAccMiss],
             ["Montaja hazır (yeri hazır, montaj başlamadı)",sReady],
             ["Yeri hazır olmayan",sNotReady],
+            ["Teslim edilen — aksesuar dahil (hakediş)",doors.filter(function(d2){return d2.teslim&&d2.teslim.lvl===2;}).length],
+            ["Teslim edilen — kasa-kanat (hakediş)",doors.filter(function(d2){return d2.teslim&&d2.teslim.lvl===1;}).length],
+            ["Teslim edilmemiş",doors.filter(function(d2){return !(d2.teslim&&d2.teslim.lvl);}).length],
             ["Ortalama ilerleme","%"+overallPct],[]
           ];
           sumRows.push(["KAT MATRİSİ"]);
@@ -1724,7 +1782,7 @@ export default function App(){
           (function(){
             var HWL={hw_lock:"Kilit",hw_handle:"Kol/Panikbar",hw_closer:"Hidrolik",hw_acc:"Aksesuar"};
             var sm={tot:doors.length,done:0,acc:0,ready:0,nr:0},pctSum=0;
-            var nrByKat={},rdByKat={},accByKat={},mat={};
+            var nrByKat={},rdByKat={},accByKat={},lpByKat={},mat={};
             doors.forEach(function(d2){
               var st=d2.steps||{};var p=pct(d2);pctSum+=p;
               var fl=(st.frame&&st.frame.done)&&(st.leaf&&st.leaf.done);
@@ -1752,6 +1810,7 @@ export default function App(){
                 if(!rdByKat[kat])rdByKat[kat]=[];
                 rdByKat[kat].push("#"+d2.code);
               }
+              if(d2.locPending){if(!lpByKat[kat])lpByKat[kat]=[];lpByKat[kat].push("#"+d2.code);}
             });
             var avg=sm.tot>0?Math.round(pctSum/sm.tot):0;
             html+="<div class='sumbox'>";
@@ -1779,6 +1838,8 @@ export default function App(){
               keys.sort(katCmp).forEach(function(k){html+="<tr><td>"+k+"</td><td>"+map[k].length+"</td><td>"+map[k].join(" · ")+"</td></tr>";});
               html+="</table>";
             }
+            var lpn=0;Object.keys(lpByKat).forEach(function(k){lpn+=lpByKat[k].length;});
+            if(lpn>0)katTable("📍 YERİ DEĞİŞEN — LOKASYON TEYİDİ BEKLEYEN ("+lpn+" adet)",lpByKat,"");
             katTable("⛔ YERİ HAZIR OLMAYAN KAPILAR — KAT BAZINDA ("+sm.nr+" adet)",nrByKat,"red");
             katTable("🔧 KASA+KANAT MONTE — SADECE AKSESUAR EKSİK ("+sm.acc+" adet)",accByKat,"");
             katTable("📦 MONTAJA HAZIR, MONTAJ BEKLEYEN ("+sm.ready+" adet)",rdByKat,"");
@@ -2550,8 +2611,10 @@ export default function App(){
               var mf=filter==="all"||stat(d2)===filter;
               var sst=siteSt(d2);
               var msf=siteFilter==="all"||(siteFilter==="ready"&&sst==="ready")||(siteFilter==="not_ready"&&sst==="not_ready")||(siteFilter==="unchecked"&&!sst);
-              return ms&&mf&&msf;
+              return ms&&mf&&msf&&wfMatch(d2,wfFilter);
             });
+            var wfC={kasakanat:0,aksesuar:0,yerhazir:0,teslim:0};
+            carpCurDoors.forEach(function(d2){["kasakanat","aksesuar","yerhazir","teslim"].forEach(function(k){if(wfMatch(d2,k))wfC[k]++;});});
             return(<div>
             <input value={search} onChange={function(e){setSearch(e.target.value);}} placeholder="Ara: #, mahal, tip…" style={{...INP,marginBottom:10}}/>
             <div style={{display:"flex",gap:6,marginBottom:6,flexWrap:"wrap"}}>
@@ -2560,6 +2623,10 @@ export default function App(){
             <div style={{display:"flex",gap:6,marginBottom:6,flexWrap:"wrap"}}>
               {[["all","📍 Yer: Tümü"],["ready","🟢 Hazır ("+srdy+")"],["not_ready","🔴 Değil ("+snot+")"],["unchecked","⚪ Kontrolsüz ("+sun+")"]].map(function(f2){return <button key={f2[0]} onClick={function(){setSiteFilter(f2[0]);}} style={{...B,background:siteFilter===f2[0]?(f2[0]==="not_ready"?"#e74c3c":f2[0]==="ready"?"#27ae60":"#2a7fff"):"#fff",color:siteFilter===f2[0]?"#fff":"#777",fontSize:10,padding:"5px 10px",border:siteFilter===f2[0]?"none":"1px solid #ddd"}}>{f2[1]}</button>;})}
             </div>
+                <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+                  {[["all","⚙ Tümü"],["kasakanat","🏗 Kasa+Kanat Monte ("+wfC.kasakanat+")"],["aksesuar","🔧 Aksesuar Tamam ("+wfC.aksesuar+")"],["yerhazir","📍 Hazır · Başlanmamış ("+wfC.yerhazir+")"],["teslim","📦 Teslim Edildi ("+wfC.teslim+")"]].filter(function(f2){return !(isEmp&&f2[0]==="teslim");}).map(function(f2){return <button key={f2[0]} onClick={function(){setWfFilter(f2[0]);}} style={{...B,background:wfFilter===f2[0]?"#1F3864":"#fff",color:wfFilter===f2[0]?"#fff":"#777",fontSize:10,padding:"5px 10px",border:wfFilter===f2[0]?"none":"1px solid #ddd"}}>{f2[1]}</button>;})}
+                </div>
+
             <div style={{fontSize:11,color:"#888",marginBottom:12}}>📍 Yer durumu: <span style={{color:"#27ae60",fontWeight:600}}>{srdy} hazır</span> · <span style={{color:"#e74c3c",fontWeight:600}}>{snot} hazır değil</span> · {sun} kontrolsüz</div>
             {cf.map(function(door){var st2=stat(door);var s2=STAT[st2];var p2=pct(door);var sss=siteSt(door);var ssn=((door.steps&&door.steps.site_check)||{}).notes;return(
             <div key={door.id} onClick={function(){listScrollRef.current=window.scrollY;setSelDoorId(door.id);go("doorDetail");}} style={{background:"#ffffff",borderRadius:12,padding:14,cursor:"pointer",border:"1px solid "+s2.fg+"22",marginBottom:8}}>
@@ -2569,6 +2636,7 @@ export default function App(){
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3,flexWrap:"wrap"}}>
                     <span style={{fontFamily:"'JetBrains Mono'",fontWeight:700,fontSize:15,color:"#1a1a2a"}}>#{door.code}</span>
                     <span style={{background:s2.bg,color:s2.fg,fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:600,textTransform:"uppercase"}}>{s2.lb}</span>
+                              {(!isEmp)&&door.teslim&&door.teslim.lvl?(<span style={{fontSize:8,background:door.teslim.lvl===2?"#27ae60":"#f39c12",color:"#fff",padding:"2px 6px",borderRadius:4,fontWeight:700}}>{door.teslim.lvl===2?"📦 TESLİM":"📦 KK TESLİM"}</span>):null}
                     {sss==="not_ready"&&<span style={{background:"#fde8e8",color:"#e74c3c",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🔴 YER HAZIR DEĞİL{reasonsText(door)?" — "+reasonsText(door):""}</span>}
                     {sss==="ready"&&p2===0&&<span style={{background:"#e8f8ee",color:"#27ae60",fontSize:8,padding:"2px 6px",borderRadius:4,fontWeight:700}}>🟢 YER HAZIR</span>}
                   </div>
